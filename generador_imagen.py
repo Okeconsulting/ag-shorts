@@ -1,10 +1,12 @@
 import os
 import sys
+import time
 from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from utils import ejecutar_con_reintentos
 
 load_dotenv()
 
@@ -23,6 +25,7 @@ def obtener_cliente_imagen() -> genai.Client:
 def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "", cliente: genai.Client = None) -> str:
     """
     Genera una imagen en formato vertical 9:16 utilizando Google Imagen 3 y la guarda en la ruta indicada.
+    Incluye reintentos automáticos si Google reporta alta demanda (503).
     """
     client = cliente or obtener_cliente_imagen()
     modelo = os.getenv("IMAGEN_MODEL", "imagen-3.0-generate-002")
@@ -40,10 +43,19 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
         output_mime_type="image/png"
     )
 
-    resultado = client.models.generate_images(
-        model=modelo,
-        prompt=prompt_completo,
-        config=config
+    def _llamar_imagen():
+        return client.models.generate_images(
+            model=modelo,
+            prompt=prompt_completo,
+            config=config
+        )
+
+    resultado = ejecutar_con_reintentos(
+        _llamar_imagen,
+        descripcion="Google Imagen 3",
+        max_reintentos=3,
+        espera_inicial=60,
+        factor_escalonado=1.3
     )
 
     if not resultado.generated_images:
@@ -58,6 +70,7 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
 def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets") -> list:
     """
     Itera sobre las escenas del JSON y genera las imágenes en 'carpeta_salida/img_{id}.png'.
+    Aplica una pausa de 5 segundos entre cada generación para evitar saturar la cuota de la API.
     Retorna la lista de rutas generadas.
     """
     os.makedirs(carpeta_salida, exist_ok=True)
@@ -65,8 +78,9 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
     estilo_global = datos_json.get("estilo_visual_global", "")
     escenas = datos_json.get("escenas", [])
     rutas_imagenes = []
+    total_escenas = len(escenas)
 
-    print(f"[Imagen 3] Iniciando generación de {len(escenas)} escenas verticales en '{carpeta_salida}'...")
+    print(f"[Imagen 3] Iniciando generación de {total_escenas} escenas verticales en '{carpeta_salida}'...")
     for idx, escena in enumerate(escenas, start=1):
         escena_id = escena.get("id_escena", escena.get("escena_id", idx))
         ruta = os.path.join(carpeta_salida, f"img_{escena_id}.png")
@@ -77,6 +91,11 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
             cliente=client
         )
         rutas_imagenes.append(ruta)
+
+        # Pausa preventiva de 5 segundos entre generaciones de imágenes para no saturar
+        if idx < total_escenas:
+            print(f"[Imagen 3] Pausa preventiva de 5 segundos antes de la siguiente escena ({idx}/{total_escenas})...")
+            time.sleep(5)
 
     print(f"[Imagen 3] Todas las imágenes ({len(rutas_imagenes)}) fueron generadas correctamente.")
     return rutas_imagenes

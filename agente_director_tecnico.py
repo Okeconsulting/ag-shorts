@@ -11,7 +11,7 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 
 from google import genai
 from google.genai import types
-from utils import slugify
+from utils import slugify, ejecutar_con_reintentos
 
 load_dotenv()
 
@@ -84,17 +84,24 @@ Reglas Técnicas de Producción:
 Estilo visual complementario: {estilo_visual or 'Cinematográfico, hiperrealista, iluminación suave de estudio tech, 8k'}
 """
 
-    print(f"[Director Técnico] Procesando guion '{titulo_video}' en escenas técnicas con '{modelo}'...")
-
-    response = client.models.generate_content(
-        model=modelo,
-        contents=instrucciones_sistema,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=MatrizProduccion,
-            temperature=0.4,
-            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+    def _llamar_director():
+        return client.models.generate_content(
+            model=modelo,
+            contents=instrucciones_sistema,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=MatrizProduccion,
+                temperature=0.4,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            )
         )
+
+    response = ejecutar_con_reintentos(
+        _llamar_director,
+        descripcion=f"Agente Director Técnico ({modelo})",
+        max_reintentos=3,
+        espera_inicial=60,
+        factor_escalonado=1.3
     )
 
     datos = json.loads(response.text)

@@ -12,7 +12,7 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 
 from google import genai
 from google.genai import types
-from utils import slugify
+from utils import slugify, ejecutar_con_reintentos
 
 load_dotenv()
 
@@ -67,17 +67,24 @@ Tema técnico: {tema}
 Enfoque o contexto adicional: {enfoque or 'Divulgación tecnológica para público general y empresas'}
 """
 
-    print(f"[Agente Redactor] Investigando y redactando guion para: '{tema}' con modelo '{modelo}'...")
-
-    response = client.models.generate_content(
-        model=modelo,
-        contents=prompt_instrucciones,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=RedaccionShort,
-            temperature=0.6,
-            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+    def _llamar_gemini():
+        return client.models.generate_content(
+            model=modelo,
+            contents=prompt_instrucciones,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=RedaccionShort,
+                temperature=0.6,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            )
         )
+
+    response = ejecutar_con_reintentos(
+        _llamar_gemini,
+        descripcion=f"Agente Redactor ({modelo})",
+        max_reintentos=3,
+        espera_inicial=60,
+        factor_escalonado=1.3
     )
 
     datos = json.loads(response.text)

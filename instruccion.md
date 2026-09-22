@@ -156,3 +156,7 @@ ag-shorts/
 2. **Cierre Institucional:** Todo video finaliza obligatoriamente con *"En Okeconsulting estamos para acompañarte."*
 3. **Tiempo:** Discurso de máximo 120 palabras; escenas de 3 a 5 segundos con duración acumulada de 60 a 70 segundos.
 4. **Coherencia Visual:** Narrador masculino ante laptop (*Hispanic/Latino man in his 30s seated in front of laptop*) en escenas de anclaje, intercalado con conceptos fotorrealistas sin texto visible en formato vertical 9:16.
+5. **Resiliencia ante saturación (503 UNAVAILABLE):**
+   - Ante congestión temporal de Google Gemini, el sistema activa automáticamente **3 reintentos escalonados** con una pausa inicial de **60 segundos** (escalando a 78s y 100s).
+   - En la generación de imágenes con Google Imagen 3, el sistema aplica una **pausa preventiva de 5 segundos** entre cada escena descargada para no saturar las cuotas de ráfaga de la API.
+
