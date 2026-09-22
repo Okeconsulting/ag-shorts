@@ -25,8 +25,8 @@ class EscenaTecnica(BaseModel):
     prompt_imagen: str = Field(
         description="Prompt en INGLÉS detallado para escena visual estática, iluminación cinematográfica, 9:16 vertical format, sin texto visible."
     )
-    duracion_estimada_segundos: int = Field(
-        description="Duración estimada de la escena (estrictamente entre 3 y 5 segundos)."
+    duracion_estimada_segundos: float = Field(
+        description="Duración estimada de la escena en segundos (ej. 2 a 4 segundos)."
     )
 
 class MatrizProduccion(BaseModel):
@@ -34,7 +34,7 @@ class MatrizProduccion(BaseModel):
         description="Título conciso del video"
     )
     escenas: List[EscenaTecnica] = Field(
-        description="Lista de escenas secuenciales de 3 a 5 segundos sumando entre 60 y 70 segundos totales."
+        description="Lista de escenas secuenciales sumando entre 60 y 70 segundos totales."
     )
 
 def obtener_cliente_gemini() -> genai.Client:
@@ -49,19 +49,23 @@ def obtener_cliente_gemini() -> genai.Client:
 def generar_matriz_director_tecnico(
     titulo_video: str,
     narracion_aprobada: str,
+    num_escenas: int = 24,
     estilo_visual: Optional[str] = None,
     carpeta_json: str = "JSON_Pront"
 ) -> tuple[dict, str]:
     """
     Agente Director Técnico (Paso 3):
     Toma el guion aprobado y genera la matriz de producción en formato JSON estricto:
-    - Escenas de 3 a 5 segundos (60-70 seg totales).
-    - Narrador masculino sentado ante laptop en tomas clave y cierre.
-    - Prompts en inglés para Google Imagen 3 (9:16 vertical format, sin texto visible).
+    - Escenas dinámicas (ritmo ágil, 60-70 seg totales).
+    - Avatar Robot futurista y carismático sentado ante una laptop holográfica.
+    - Variedad de planos de cámara (medium shot, close-up, over-the-shoulder, isometric).
+    - Prompts en inglés para formato vertical 9:16 sin texto visible.
     - Guarda el resultado en 'JSON_Pront/<titulo_video>.json'.
     """
     client = obtener_cliente_gemini()
     modelo = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+    duracion_promedio = max(1.0, round(65.0 / max(1, num_escenas), 1))
 
     instrucciones_sistema = f"""
 Eres un orquestador de video técnico automatizado. Tu única función es recibir el guion aprobado y devolver una matriz de producción en formato JSON estricto.
@@ -73,15 +77,16 @@ Texto Completo:
 
 Reglas Técnicas de Producción:
 1. El campo 'narracion': Distribuye íntegramente el texto aprobado a lo largo de las escenas en orden secuencial. No omitas texto ni inventes frases que alteren el guion. La última escena debe conservar el cierre institucional.
-2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática y fotorrealista. NUNCA pidas texto visible en la imagen (agrega 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
-3. Duración: Divide el contenido en escenas de entre 3 y 5 segundos, para obtener un total de 60 a 70 segundos (aproximadamente 14 a 18 escenas cortas y dinámicas).
-4. Coherencia visual: Todas las escenas deben compartir la misma atmósfera, paleta de color e iluminación cinematográfica.
-5. Narrador masculino ante laptop:
-   - Características visuales inmutables: 'A professional Hispanic/Latino man in his 30s with short dark neat hair, well-groomed beard, wearing a charcoal minimalist crewneck sweater, seated at a clean dark wooden desk in front of a modern glowing laptop'.
-   - Debe aparecer en la escena 1 (gancho), en escenas de transición intermedias y en la escena final.
-6. Transición a conceptos: Las escenas conceptuales (diagramas, analogías, servidores, flujos de datos) deben usar la misma iluminación suave y paleta de color para asegurar transiciones suaves y naturales.
+2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática y fotorrealista. NUNCA pidas texto visible en la imagen (agrega siempre 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
+3. Duración y Dinamismo Visual: Divide el contenido en aproximadamente {num_escenas} escenas de ritmo muy ágil (promedio ~{duracion_promedio} segundos cada una), sumando un total estricto de entre 60 y 70 segundos netos para mantener un ritmo de retención hiperdinámico.
+4. Coherencia visual: Todas las escenas deben compartir la misma atmósfera cinematográfica, paleta de colores (dark slate, cyan neon, warm amber accents) y calidad 8k.
+5. Presentador Robot ante Laptop (Avatar Oficial):
+   - Sujeto inmutable: 'A sleek, friendly, futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a modern minimalist tech workstation in front of an open glowing holographic laptop'.
+   - El robot narrador debe aparecer en la escena 1 (gancho), en escenas de anclaje intermedias y en la escena final.
+   - Variedad de encuadres: varía intencionalmente entre 'medium shot of the robot looking to camera', 'close-up shot of the robot expressive eyes', 'over-the-shoulder shot looking at the glowing laptop screen'.
+6. Escenas conceptuales fluidas: Las escenas intermedias ilustran la analogía o concepto técnico (ej. diagramas de red 3D, flujos de partículas luminosas, arquitectura de software isométrica), compartiendo la misma iluminación suave y atmósfera que el entorno del robot para una transición visual imperceptible.
 
-Estilo visual complementario: {estilo_visual or 'Cinematográfico, hiperrealista, iluminación suave de estudio tech, 8k'}
+Estilo visual complementario: {estilo_visual or 'Cinematográfico, hiperrealista, iluminación suave de estudio tech, 8k render'}
 """
 
     def _llamar_director():

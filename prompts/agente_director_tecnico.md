@@ -14,8 +14,8 @@ Reglas:
 2. El campo 'prompt_imagen' DEBE estar en INGLÉS. Debe describir una escena visual estática, altamente detallada. NUNCA pidas que se genere texto visible en la imagen (prohibido texto, letras o marcas de agua). Obliga a que la imagen sea vertical ('9:16 vertical format').
 3. Divide el contenido en escenas de entre 3 y 5 segundos, para obtener un video de 1 minuto de duración total (puede llegar hasta 1 minuto 10 segundos; 60 a 70 segundos totales).
 4. Las características visuales deben ser constantes en todas las escenas generadas (paleta de color, atmósfera, iluminación y estilo de render cinematográfico coherente).
-5. El video debe tener un narrador masculino sentado ante una laptop en un entorno tecnológico coherente. Las escenas deben alternar e integrar tomas de este narrador explicando el concepto con las escenas visuales conceptuales.
-6. La transición a imágenes para el concepto debe ser suave, manteniendo continuidad visual y sin cortes bruscos.
+5. El video debe tener un presentador Robot futurista y carismático sentado ante una laptop holográfica en un entorno tecnológico coherente. Las tomas del robot narrador deben alternar planos medios, primeros planos y planos sobre el hombro con las escenas conceptuales 3D.
+6. La transición a imágenes para el concepto debe ser suave, compartiendo la misma paleta de color (slate gray, cyan neon, warm amber) e iluminación.
 ```
 
 ---
@@ -29,8 +29,8 @@ Reglas:
     {
       "id_escena": 1,
       "narracion": "¿Sabías que los modelos de lenguaje no tienen memoria a largo plazo?",
-      "prompt_imagen": "A modern tech room with soft blue neon lighting, a handsome professional Hispanic male in his 30s with short dark hair, wearing a dark crewneck sweater, seated at a desk in front of a sleek modern laptop, looking thoughtfully towards the camera, cinematic lighting, photorealistic 8k, no text, 9:16 vertical format",
-      "duracion_estimada_segundos": 4
+      "prompt_imagen": "A modern tech room with soft blue neon lighting, a sleek friendly humanoid robot with glowing cyan LED eyes, polished white ceramic and titanium chassis, seated at a desk in front of a glowing holographic laptop, looking to camera, cinematic lighting, photorealistic 8k, no text, 9:16 vertical format",
+      "duracion_estimada_segundos": 3
     },
     {
       "id_escena": 2,
@@ -45,6 +45,6 @@ Reglas:
 ---
 
 ## 🔒 Parámetros de Coherencia Visual (Constantes de Escena)
-- **Sujeto narrador recurrente:** "A professional male in his 30s with short dark hair, seated in front of an open laptop, modern minimalist studio desk, soft ambient cyan and charcoal lighting".
+- **Sujeto narrador recurrente (Avatar Oficial):** "A sleek, friendly, futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a modern tech workstation in front of an open glowing holographic laptop".
 - **Composición constante:** Formato vertical `9:16 vertical format`.
 - **Negativos implícitos:** `no text, no letters, no logos, no watermarks, no distorted anatomy`.

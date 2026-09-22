@@ -27,7 +27,7 @@ PAYLOAD_EJEMPLO = {
         {
             "id_escena": 1,
             "narracion": "¿Sabías cómo se comunican las aplicaciones que usas todos los días?",
-            "prompt_imagen": "A modern tech room with soft blue neon lighting, a handsome professional Hispanic male in his 30s with short dark hair, seated at a desk in front of a sleek laptop, looking thoughtfully towards the camera, cinematic lighting, photorealistic 8k, no text, 9:16 vertical format",
+            "prompt_imagen": "A modern minimalist tech workstation, a sleek friendly futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a desk in front of an open glowing holographic laptop, looking thoughtfully towards the camera, cinematic lighting, photorealistic 8k, no text, 9:16 vertical format",
             "duracion_estimada_segundos": 4
         },
         {
@@ -45,7 +45,7 @@ PAYLOAD_EJEMPLO = {
         {
             "id_escena": 4,
             "narracion": "Conecta sistemas de forma invisible y segura. En Okeconsulting estamos para acompañarte.",
-            "prompt_imagen": "The same professional Hispanic male in his 30s smiling confidently in front of his laptop, warm ambient lighting, 9:16 vertical format, no text",
+            "prompt_imagen": "The same sleek friendly futuristic humanoid robot with glowing cyan LED visor eyes smiling confidently in front of its holographic laptop, warm ambient lighting, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 4
         }
     ]
@@ -54,6 +54,7 @@ PAYLOAD_EJEMPLO = {
 def ejecutar_flujo_completo(
     tema: str,
     estilo_visual: str = None,
+    num_escenas: int = 24,
     auto_aprobar: bool = False,
     usar_ejemplo: bool = False,
     solo_guion: bool = False,
@@ -64,7 +65,7 @@ def ejecutar_flujo_completo(
     1. Entrada del tema.
     2. Agente de Redacción + Aprobación/Edición Humana -> guiones/<slug>.md
     3. Agente Director Técnico -> JSON_Pront/<slug>.json
-    4. Generación de imágenes Google Imagen 3 -> Escenas/<slug>/img_X.png
+    4. Generación de imágenes FLUX (9:16 gratuito) -> Escenas/<slug>/img_X.png
     5. Síntesis de voz Edge-TTS (es-CL-LorenzoNeural) -> Audios/<slug>/audio_X.mp3
     6. Ensamblaje y Renderizado MoviePy -> shorts/<slug>/<slug>.mp4
     """
@@ -120,6 +121,7 @@ def ejecutar_flujo_completo(
             matriz_json, ruta_json = generar_matriz_director_tecnico(
                 titulo_video=titulo_video,
                 narracion_aprobada=narracion_aprobada,
+                num_escenas=num_escenas,
                 estilo_visual=estilo_visual,
                 carpeta_json="JSON_Pront"
             )
@@ -164,7 +166,8 @@ def ejecutar_flujo_completo(
         carpeta_imagenes=carpeta_escenas,
         carpeta_audios=carpeta_audios,
         archivo_salida=archivo_video_salida,
-        fps=fps
+        fps=fps,
+        matriz_escenas=matriz_json.get("escenas", [])
     )
 
     print("\n" + "="*70)
@@ -184,7 +187,9 @@ def main():
     parser.add_argument("-i", "--input", "--tema", dest="tema", type=str, default=None,
                         help="Tema o concepto técnico a investigar (Paso 1)")
     parser.add_argument("--estilo", type=str, default=None,
-                        help="Estilo visual adicional para Google Imagen 3")
+                        help="Estilo visual adicional para motor FLUX")
+    parser.add_argument("--escenas", type=int, default=24,
+                        help="Número objetivo de escenas dinámicas (recomendado 20-30 para ritmo viral)")
     parser.add_argument("--auto", action="store_true",
                         help="Aprobar automáticamente el guion sin pedir confirmación por consola")
     parser.add_argument("--ejemplo", action="store_true",
@@ -209,6 +214,7 @@ def main():
     ejecutar_flujo_completo(
         tema=tema_seleccionado or "Funcionamiento de una API",
         estilo_visual=args.estilo,
+        num_escenas=args.escenas,
         auto_aprobar=args.auto,
         usar_ejemplo=args.ejemplo,
         solo_guion=args.solo_guion,

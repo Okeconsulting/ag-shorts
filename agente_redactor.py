@@ -22,7 +22,7 @@ class RedaccionShort(BaseModel):
     tema: str = Field(description="Tema o concepto técnico investigado")
     titulo_video: str = Field(description="Título atractivo, conciso y directo para el video Short")
     discurso_completo: str = Field(
-        description="Discurso total de narración en excelente español, educativo, empático y de no más de 120 palabras. Debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'"
+        description="Discurso total de narración en excelente español, educativo, empático, de entre 150 y 170 palabras para garantizar mínimo 60 segundos de locución. Debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'"
     )
     conteo_palabras: int = Field(description="Número exacto de palabras del discurso_completo")
     idea_analogia: str = Field(description="Breve descripción de la analogía cotidiana empleada")
@@ -57,9 +57,9 @@ NORMAS ESTRICTAS DE REDACCIÓN:
    - Explica el tema técnico mediante una analogía sencilla o un caso práctico.
    - Tono cálido, pedagógico y accesible.
    - CRÍTICO: Jamás menosprecies ni subestimes al espectador. Prohibido usar expresiones como "es obvio", "como todos saben" o "es muy fácil". Todo espectador merece respeto y aprendizaje claro.
-3. LÍMITE DE PALABRAS:
-   - El discurso completo DEBE TENER 120 PALABRAS O MENOS en total.
-   - Diseñado para que la locución a ritmo claro y pausado dure entre 45 y 55 segundos.
+3. LONGITUD OBLIGATORIA (DURACIÓN MÍNIMA DE 60 SEGUNDOS):
+   - El discurso completo DEBE TENER ENTRE 150 Y 170 PALABRAS (estrictamente mínimo 145 palabras).
+   - Desarrolla el tema con un gancho atractivo, problema real, analogía clara y valor práctico para alcanzar la duración exacta de 60 a 70 segundos al ser locutado.
 4. CIERRE OBLIGATORIO:
    - La última frase del discurso debe ser EXACTAMENTE: "{FRASE_CIERRE_OBLIGATORIA}" (sin omitir ni modificar una sola palabra).
 
@@ -98,11 +98,11 @@ Enfoque o contexto adicional: {enfoque or 'Divulgación tecnológica para públi
         else:
             discurso = f"{discurso.rstrip('.')} {FRASE_CIERRE_OBLIGATORIA}"
 
-    # Límite estricto de 120 palabras
+    # Límite superior de 175 palabras
     palabras = discurso.split()
-    if len(palabras) > 120:
+    if len(palabras) > 175:
         cierre_palabras = FRASE_CIERRE_OBLIGATORIA.split()
-        cuerpo = palabras[:(120 - len(cierre_palabras))]
+        cuerpo = palabras[:(170 - len(cierre_palabras))]
         discurso = " ".join(cuerpo).rstrip(".,;:") + ". " + FRASE_CIERRE_OBLIGATORIA
 
     datos["discurso_completo"] = discurso
@@ -122,7 +122,7 @@ def guardar_guion_aprobado(datos_guion: dict, carpeta_guiones: str = "guiones") 
     contenido_md = f"""# {datos_guion.get('titulo_video')}
 
 - **Tema:** {datos_guion.get('tema')}
-- **Palabras:** {datos_guion.get('conteo_palabras')} palabras (límite 120)
+- **Palabras:** {datos_guion.get('conteo_palabras')} palabras (objetivo 150-170 palabras, mínimo 60s)
 - **Fecha:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 - **Analogía:** {datos_guion.get('idea_analogia')}
 
@@ -163,7 +163,7 @@ def solicitar_aprobacion_humana(datos_guion: dict, auto_aprobar: bool = False) -
         print("="*65)
         print(f"📌 TÍTULO:   {titulo}")
         print(f"💡 ANALOGÍA: {guion_actual.get('idea_analogia')}")
-        print(f"📊 LONGITUD: {palabras} palabras (máximo 120)")
+        print(f"📊 LONGITUD: {palabras} palabras (objetivo 150-170 palabras, mínimo 60s)")
         print("-"*65)
         print("🎙️ NARRACIÓN:")
         print(discurso)

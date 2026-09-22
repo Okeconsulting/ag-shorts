@@ -10,6 +10,10 @@ assets/
 Escenas/
 Audios/
 shorts/
+guiones/*
+!guiones/.gitkeep
+JSON_Pront/*
+!JSON_Pront/.gitkeep
 *.mp4
 *.mp3
 *.png
