@@ -1,4 +1,8 @@
 import os
+import sys
+
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Soporte dual para MoviePy v1.x y v2.x
 try:
@@ -6,19 +10,30 @@ try:
 except ImportError:
     from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
-def renderizar_video_final(num_escenas: int, archivo_salida: str = "short_final.mp4", fps: int = 30):
+def renderizar_video_final(
+    num_escenas: int,
+    carpeta_imagenes: str = "assets",
+    carpeta_audios: str = "assets",
+    archivo_salida: str = "short_final.mp4",
+    fps: int = 30
+) -> str:
     """
-    Ensambla imágenes y audios, ajustando la duración de cada escena 
+    Ensambla imágenes y audios desde sus respectivas carpetas, ajustando la duración de cada escena 
     a la duración exacta de su pista de voz, y renderiza en hardware local.
-    Compatible con MoviePy 1.x y 2.x en formato vertical 9:16 (1080x1920).
+    Formato vertical 9:16 (1080x1920) y salida en archivo_salida.
     """
     clips_de_video = []
+    directorio_salida = os.path.dirname(archivo_salida)
+    if directorio_salida:
+        os.makedirs(directorio_salida, exist_ok=True)
     
-    print("[Renderizado] Iniciando ensamblaje de línea de tiempo...")
+    print(f"[Renderizado] Iniciando ensamblaje de línea de tiempo ({num_escenas} escenas)...")
+    print(f"  - Imágenes desde: '{carpeta_imagenes}'")
+    print(f"  - Audios desde:   '{carpeta_audios}'")
     
     for i in range(1, num_escenas + 1):
-        ruta_img = f"assets/img_{i}.png"
-        ruta_audio = f"assets/audio_{i}.mp3"
+        ruta_img = os.path.join(carpeta_imagenes, f"img_{i}.png")
+        ruta_audio = os.path.join(carpeta_audios, f"audio_{i}.mp3")
         
         # Validar que los archivos existan
         if not os.path.exists(ruta_img) or not os.path.exists(ruta_audio):
@@ -54,13 +69,13 @@ def renderizar_video_final(num_escenas: int, archivo_salida: str = "short_final.
         print(f"[Renderizado] Escena {i} ensamblada ({duracion:.2f}s)")
         
     if not clips_de_video:
-        raise RuntimeError("No se pudieron ensamblar clips. Revisa que existan imágenes y audios en assets/")
+        raise RuntimeError(f"No se pudieron ensamblar clips. Verifica las carpetas '{carpeta_imagenes}' y '{carpeta_audios}'.")
 
     # 3. Concatenar todos los clips en orden
     video_final = concatenate_videoclips(clips_de_video, method="compose")
     
     # 4. Compilar usando CPU local
-    print(f"[Renderizado] Compilando archivo {archivo_salida} a {fps} FPS...")
+    print(f"[Renderizado] Compilando video en '{archivo_salida}' a {fps} FPS...")
     video_final.write_videofile(
         archivo_salida, 
         fps=fps, 

@@ -29,7 +29,7 @@ El proyecto utiliza variables de entorno mediante el paquete `python-dotenv`. El
    ```bash
    GEMINI_MODEL=gemini-2.5-flash
    IMAGEN_MODEL=imagen-3.0-generate-002
-   TTS_VOICE=es-MX-JorgeNeural
+   TTS_VOICE=es-CL-LorenzoNeural
    ```
 
 ---

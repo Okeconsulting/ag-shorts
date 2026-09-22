@@ -7,6 +7,9 @@
 
 # Archivos multimedia y salidas generadas
 assets/
+Escenas/
+Audios/
+shorts/
 *.mp4
 *.mp3
 *.png
