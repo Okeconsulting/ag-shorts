@@ -1,6 +1,6 @@
 # Guía de Uso del Motor Text-to-Video (Okeconsulting)
 
-Este proyecto implementa un motor automatizado de **Text-to-Video** para YouTube Shorts, Reels y TikTok en formato vertical (9:16). Utiliza la **API de Google Gemini** como agentes de redacción y dirección técnica, **Google Imagen 3** para la generación visual, **Edge-TTS** para locución en español y **MoviePy** para ensamblaje local.
+Este proyecto implementa un motor automatizado de **Text-to-Video** para YouTube Shorts, Reels y TikTok en formato vertical (9:16). Utiliza la **API de Google Gemini** como agentes de redacción y dirección técnica, el motor **FLUX** para la generación visual en 9:16 (100% gratuito sin requerir API Key adicional), **Edge-TTS** para locución en español y **MoviePy** para ensamblaje local.
 
 ---
 
@@ -17,7 +17,7 @@ Este proyecto implementa un motor automatizado de **Text-to-Video** para YouTube
    └── Diseña escenas de 3 a 5 seg (60-70 seg totales)
    └── Define tomas con narrador masculino ante laptop y conceptos visuales en 9:16
    └── Guarda en: JSON_Pront/<titulo_video>.json
-4. Generador Visual (Google Imagen 3)
+4. Generador Visual (FLUX 9:16 Gratuito)
    └── Descarga las imágenes fotorrealistas en 9:16
    └── Guarda en: Escenas/<titulo_video>/img_X.png
 5. Síntesis de Voz (Edge-TTS)
@@ -38,11 +38,10 @@ Este proyecto implementa un motor automatizado de **Text-to-Video** para YouTube
    ```
 
 2. **Configurar API Key en `.env`:**
-   Copia `.env.example` a `.env` y coloca tu clave de Google AI Studio:
+   Copia `.env.example` a `.env` y coloca tu clave de Google AI Studio (solo necesaria para texto y dirección):
    ```bash
    GEMINI_API_KEY=AIzaSy...TuClaveAqui...
-   GEMINI_MODEL=gemini-2.5-flash
-   IMAGEN_MODEL=imagen-3.0-generate-002
+   GEMINI_MODEL=gemini-2.0-flash
    TTS_VOICE=es-CL-LorenzoNeural
    VIDEO_FPS=30
    ```

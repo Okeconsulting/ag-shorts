@@ -134,15 +134,14 @@ def ejecutar_flujo_completo(
     total_escenas = len(matriz_json.get("escenas", []))
 
     # --------------------------------------------------------------------------
-    # PASO 4: Generación Visual con Google Imagen 3 -> Escenas/<slug>/
+    # PASO 4: Generación Visual con Motor FLUX (9:16) -> Escenas/<slug>/
     # --------------------------------------------------------------------------
     carpeta_escenas = os.path.join("Escenas", slug)
-    print(f"\n[Paso 4] Generando escenas visuales en '{carpeta_escenas}' con Google Imagen 3...")
+    print(f"\n[Paso 4] Generando escenas visuales en '{carpeta_escenas}' con motor FLUX (9:16)...")
     try:
         generar_imagenes_desde_json(matriz_json, carpeta_salida=carpeta_escenas)
     except Exception as e:
         print(f"\n[Error en Paso 4] {e}")
-        print(f"[Aviso] Si estás probando sin cuota o clave de Imagen 3, coloca las imágenes en '{carpeta_escenas}/img_1.png', etc.")
         return
 
     # --------------------------------------------------------------------------
