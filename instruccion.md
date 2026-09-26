@@ -90,7 +90,19 @@ Opciones de Aprobación Humana:
 
 ---
 
-### Ejemplo 2: Ajustar Número de Escenas Dinámicas
+### Ejemplo 2: Reutilizar un Guion Existente con Menos Escenas y Mayor Velocidad
+Si ya tienes un guion redactado en `guiones/` y deseas redistribuirlo en **menos escenas** (ej. 8 a 10 escenas para oraciones continuas y lectura más fluida) y/o aumentar la rapidez de locución:
+```powershell
+python orquestador.py --guion automatiza_la_atencion_de_tu_pyme_sin_perder_cerca.json --escenas 8 --velocidad "+15%"
+```
+*También puedes pasar directamente la ruta con `-i`:*
+```powershell
+python orquestador.py -i guiones/automatiza_la_atencion_de_tu_pyme_sin_perder_cerca.json --escenas 10
+```
+
+---
+
+### Ejemplo 3: Ajustar Número de Escenas Dinámicas
 El sistema utiliza 24 escenas de forma predeterminada (~2.5 segundos por toma para máxima retención). Si deseas ajustar el número de escenas:
 ```powershell
 python orquestador.py -i "Qué es la arquitectura de microservicios" --escenas 30
@@ -98,7 +110,7 @@ python orquestador.py -i "Qué es la arquitectura de microservicios" --escenas 3
 
 ---
 
-### Ejemplo 3: Generar y Revisar Solo el Guion
+### Ejemplo 4: Generar y Revisar Solo el Guion
 Si deseas redactar y guardar el guion en `guiones/` sin generar imágenes ni video:
 ```powershell
 python orquestador.py -i "Qué es un ataque de Phishing" --solo-guion
@@ -107,7 +119,7 @@ python orquestador.py -i "Qué es un ataque de Phishing" --solo-guion
 
 ---
 
-### Ejemplo 4: Generar Guion y Matriz Técnica de Escenas
+### Ejemplo 5: Generar Guion y Matriz Técnica de Escenas
 Si deseas avanzar hasta la matriz JSON técnica en `JSON_Pront/` para revisar los prompts visuales y tomas de cámara:
 ```powershell
 python orquestador.py -i "Qué son las bases de datos vectoriales" --solo-json
@@ -116,7 +128,7 @@ python orquestador.py -i "Qué son las bases de datos vectoriales" --solo-json
 
 ---
 
-### Ejemplo 5: Ejecución Desatendida / Automática
+### Ejemplo 6: Ejecución Desatendida / Automática
 Para pipelines automatizados donde no se requiera intervención humana:
 ```powershell
 python orquestador.py -i "La regla 3-2-1 para copias de seguridad" --auto
@@ -124,7 +136,7 @@ python orquestador.py -i "La regla 3-2-1 para copias de seguridad" --auto
 
 ---
 
-### Ejemplo 6: Modo de Prueba Local (Sin llamadas a API)
+### Ejemplo 7: Modo de Prueba Local (Sin llamadas a API)
 Prueba todo el pipeline de ensamblaje, audio, subtítulos y video con datos locales:
 ```powershell
 python orquestador.py --ejemplo
