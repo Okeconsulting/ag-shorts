@@ -10,15 +10,16 @@ Este proyecto implementa un motor automatizado de **Text-to-Video** para YouTube
 1. Entrada del Tema (CLI)
    └── python orquestador.py -i "tema a investigar"
 2. Agente de Redacción (Gemini)
-   └── Redacta título y narración (150-170 palabras para duración ≥ 60s + cierre institucional)
+   └── Redacta para Pymes con tono didáctico y respetuoso (150-170 palabras para duración ≥ 60s)
    └── 🛑 Pausa de Aprobación Humana (Aprobar / Cambiar palabras / Editar / Regenerar)
    └── Guarda en: guiones/<slug>.md y .json
 3. Agente Director Técnico (Gemini)
    └── Diseña escenas dinámicas (~2.5s por toma, 20-30 escenas configurables)
-   └── Define tomas con Presentador Robot ante laptop holográfica y conceptos visuales en 9:16
+   └── Asigna intro y cierre al Avatar de Marca y conceptos en TONOS CLAROS para Pymes
    └── Guarda en: JSON_Pront/<slug>.json
-4. Generador Visual (FLUX 9:16 Gratuito)
-   └── Descarga las imágenes fotorrealistas en 1080x1920 (9:16) con pausa preventiva de 5s
+4. Generador Visual (Avatar Oficial + FLUX 9:16)
+   └── Primera (img_1.png) y última escena (img_N.png) fijadas con 'avatar/avatar.jpg'
+   └── Escenas intermedias generadas con FLUX en TONOS CLAROS (1080x1920)
    └── Guarda en: Escenas/<slug>/img_X.png
 5. Síntesis de Voz (Edge-TTS)
    └── Genera las narraciones por escena con voz 'es-CL-LorenzoNeural'
@@ -163,11 +164,11 @@ ag-shorts/
 
 1. **Voz:** Narración en español con locución fluida `es-CL-LorenzoNeural` vía Edge-TTS.
 2. **Cierre Institucional:** Todo video finaliza obligatoriamente con *"En Okeconsulting estamos para acompañarte."*
-3. **Duración Garantizada (≥ 60s):** Guion calibrado estrictamente a **150–170 palabras** (a ~140 palabras por minuto produce entre 62 y 70 segundos netos).
-4. **Avatar Robot Oficial:** En las tomas de anclaje (escena 1, anclas intermedias y cierre) aparece un robot humanoide futurista y amigable con visor LED cian ante una laptop holográfica (`A sleek, friendly, futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a modern minimalist tech workstation in front of an open glowing holographic laptop`).
+3. **Duración Garantizada (≥ 60s) y Target Pymes:** Guion de **150–170 palabras** enfocado en resolver retos reales de Pymes y negocios. Tono pedagógico, didáctico y de absoluto respeto (prohibido el uso de condescendencias como "es obvio", "como todos saben" o "es muy fácil").
+4. **Avatar Oficial de Marca (Apertura y Cierre):** La primera escena (`img_1.png`) y la última escena (`img_N.png`) utilizan automáticamente la imagen corporativa oficial ubicada en `avatar/avatar.jpg` (personaje corporativo con traje café, corbata, cabeza blanca minimalista con gafas y logo de Okeconsulting en oficina luminosa), garantizando identidad de marca inconfundible.
 5. **Subtítulos Virales Automáticos:** Se queman directamente sobre el video con tipografía sans-serif gruesa en color amarillo dorado (`#FFD700`), contorno negro y píldora oscura semi-transparente en el tercio inferior (`y ≈ 1360`), garantizando 100% de legibilidad sin depender de ImageMagick externo.
 6. **Efecto Ken Burns (Cámara Dinámica):** Alterna suavemente entre Zoom In (`1.00 -> 1.05`) y Zoom Out (`1.05 -> 1.00`) para que ningún fotograma sea estático.
-7. **Motor Visual FLUX:** Imágenes fotorrealistas en 1080x1920 (9:16 vertical), 100% gratuito sin cuotas de facturación ni claves de Google Imagen 3.
+7. **Estilo Visual en Tonos Claros (Motor FLUX):** Todas las escenas generadas mantienen una estética luminosa y profesional en TONOS CLAROS (fondos blancos/crema, maderas claras, luz diurna suave, estética moderna y limpia, 1080x1920 en formato 9:16 vertical sin fondos lúgubres ni sombras oscuras).
 8. **Resiliencia ante saturación (503 UNAVAILABLE):**
    - Ante congestión temporal de Gemini, el sistema activa automáticamente **3 reintentos escalonados** con una pausa inicial de **60 segundos** (escalando a 78s y 100s).
    - En la descarga de imágenes FLUX, aplica una **pausa preventiva de 5 segundos** entre cada escena para no saturar los endpoints.

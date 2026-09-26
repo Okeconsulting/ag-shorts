@@ -19,6 +19,8 @@ JSON_Pront/*
 *.png
 *.jpg
 *.jpeg
+!avatar/
+!avatar/*
 
 # Python y entornos virtuales
 __pycache__/

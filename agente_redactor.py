@@ -20,12 +20,12 @@ FRASE_CIERRE_OBLIGATORIA = "En Okeconsulting estamos para acompañarte."
 
 class RedaccionShort(BaseModel):
     tema: str = Field(description="Tema o concepto técnico investigado")
-    titulo_video: str = Field(description="Título atractivo, conciso y directo para el video Short")
+    titulo_video: str = Field(description="Título atractivo, conciso, didáctico y directo para el video Short orientado a Pymes")
     discurso_completo: str = Field(
-        description="Discurso total de narración en excelente español, educativo, empático, de entre 150 y 170 palabras para garantizar mínimo 60 segundos de locución. Debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'"
+        description="Discurso total de narración en excelente español, didáctico, empático y respetuoso orientado a dueños de Pymes, de entre 150 y 170 palabras para garantizar mínimo 60 segundos de locución. Debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'"
     )
     conteo_palabras: int = Field(description="Número exacto de palabras del discurso_completo")
-    idea_analogia: str = Field(description="Breve descripción de la analogía cotidiana empleada")
+    idea_analogia: str = Field(description="Breve descripción de la analogía cotidiana empresarial o comercial empleada")
 
 def obtener_cliente_gemini() -> genai.Client:
     api_key = os.getenv("GEMINI_API_KEY")
@@ -39,32 +39,36 @@ def obtener_cliente_gemini() -> genai.Client:
 def redactar_guion_tecnico(tema: str, enfoque: Optional[str] = None) -> dict:
     """
     Agente de Estilo y Redacción:
-    Investiga el tema técnico y genera título + narración educativa,
-    respetuosa, en excelente español, ≤ 120 palabras y con el cierre institucional.
+    Investiga el tema técnico y genera título + narración didáctica orientada a Pymes,
+    respetuosa, en excelente español, 150-170 palabras (>= 60s) y con el cierre institucional.
     """
     client = obtener_cliente_gemini()
     modelo = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     prompt_instrucciones = f"""
-Eres el Especialista en Redacción y Comunicación Técnica de Okeconsulting.
-Tu misión es investigar y redactar la narración para un video corto (YouTube Short / Reel) sobre el tema solicitado.
+Eres el Especialista en Redacción y Comunicación Estratégica de Okeconsulting.
+Tu misión es investigar y redactar la narración para un video corto (YouTube Short / Reel / TikTok) sobre el tema solicitado.
+
+PÚBLICO OBJETIVO (TARGET: PYMES):
+- Dueños de pequeñas y medianas empresas (Pymes), gerentes, comerciantes y emprendedores.
+- Buscan soluciones prácticas para optimizar tiempos, automatizar tareas repetitivas, reducir costos, mejorar la atención al cliente o proteger la información de su negocio sin complicaciones técnicas innecesarias.
 
 NORMAS ESTRICTAS DE REDACCIÓN:
 1. IDIOMA Y ESTILO:
-   - Utiliza un español impecable, natural, fluido y gramaticalmente pulcro.
-   - Puntuación estratégica (comas y pausas) pensada para síntesis de voz automática.
-2. ENFOQUE EDUCATIVO Y RESPETUOSO:
-   - Explica el tema técnico mediante una analogía sencilla o un caso práctico.
-   - Tono cálido, pedagógico y accesible.
-   - CRÍTICO: Jamás menosprecies ni subestimes al espectador. Prohibido usar expresiones como "es obvio", "como todos saben" o "es muy fácil". Todo espectador merece respeto y aprendizaje claro.
+   - Utiliza un español impecable, natural, cercano, fluido y profesional.
+   - Puntuación estratégica (comas y pausas bien distribuidas) para que la síntesis de voz automática (`es-CL-LorenzoNeural`) suene humana, pausada y convincente.
+2. ENFOQUE DIDÁCTICO, EMPÁTICO Y DE MÁXIMO RESPETO:
+   - Tono pedagógico, accesible y constructivo. Explica el concepto técnico conectándolo con la realidad de un negocio.
+   - REGLA CRÍTICA DE RESPETO: Jamás menosprecies ni subestimes al espectador. Está estrictamente prohibido usar frases condescendientes como "es obvio", "como todos saben", "es muy fácil", "cualquiera lo sabe" o "no te compliques". Todo espectador merece respeto profesional y un aprendizaje claro.
+   - ANALOGÍA EMPRESARIAL COTIDIANA: Conecta el tema con situaciones del día a día de una Pyme (ej. atención al cliente, gestión de inventario, facturación, control de pedidos, seguridad de datos de clientes, coordinación del equipo).
 3. LONGITUD OBLIGATORIA (DURACIÓN MÍNIMA DE 60 SEGUNDOS):
    - El discurso completo DEBE TENER ENTRE 150 Y 170 PALABRAS (estrictamente mínimo 145 palabras).
-   - Desarrolla el tema con un gancho atractivo, problema real, analogía clara y valor práctico para alcanzar la duración exacta de 60 a 70 segundos al ser locutado.
+   - Estructura recomendada: Gancho inicial que identifique un reto real de negocio -> Explicación didáctica con analogía cotidiana -> Beneficio concreto para la Pyme (ahorro de horas, tranquilidad, más ventas) -> Cierre institucional.
 4. CIERRE OBLIGATORIO:
    - La última frase del discurso debe ser EXACTAMENTE: "{FRASE_CIERRE_OBLIGATORIA}" (sin omitir ni modificar una sola palabra).
 
 Tema técnico: {tema}
-Enfoque o contexto adicional: {enfoque or 'Divulgación tecnológica para público general y empresas'}
+Enfoque o contexto adicional: {enfoque or 'Soluciones tecnológicas, digitalización y mejores prácticas aplicadas a Pymes'}
 """
 
     def _llamar_gemini():

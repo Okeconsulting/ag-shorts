@@ -57,8 +57,8 @@ def generar_matriz_director_tecnico(
     Agente Director Técnico (Paso 3):
     Toma el guion aprobado y genera la matriz de producción en formato JSON estricto:
     - Escenas dinámicas (ritmo ágil, 60-70 seg totales).
-    - Avatar Robot futurista y carismático sentado ante una laptop holográfica.
-    - Variedad de planos de cámara (medium shot, close-up, over-the-shoulder, isometric).
+    - Escena 1 y Escena Final usan la imagen oficial del Avatar de Marca (avatar/avatar.jpg).
+    - Escenas intermedias en estética limpia, profesional y luminosa en TONOS CLAROS orientadas a Pymes.
     - Prompts en inglés para formato vertical 9:16 sin texto visible.
     - Guarda el resultado en 'JSON_Pront/<titulo_video>.json'.
     """
@@ -68,7 +68,7 @@ def generar_matriz_director_tecnico(
     duracion_promedio = max(1.0, round(65.0 / max(1, num_escenas), 1))
 
     instrucciones_sistema = f"""
-Eres un orquestador de video técnico automatizado. Tu única función es recibir el guion aprobado y devolver una matriz de producción en formato JSON estricto.
+Eres un orquestador de video técnico automatizado para Okeconsulting. Tu única función es recibir el guion aprobado y devolver una matriz de producción en formato JSON estricto.
 
 GUION APROBADO:
 Título: {titulo_video}
@@ -76,17 +76,21 @@ Texto Completo:
 {narracion_aprobada}
 
 Reglas Técnicas de Producción:
-1. El campo 'narracion': Distribuye íntegramente el texto aprobado a lo largo de las escenas en orden secuencial. No omitas texto ni inventes frases que alteren el guion. La última escena debe conservar el cierre institucional.
-2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática y fotorrealista. NUNCA pidas texto visible en la imagen (agrega siempre 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
-3. Duración y Dinamismo Visual: Divide el contenido en aproximadamente {num_escenas} escenas de ritmo muy ágil (promedio ~{duracion_promedio} segundos cada una), sumando un total estricto de entre 60 y 70 segundos netos para mantener un ritmo de retención hiperdinámico.
-4. Coherencia visual: Todas las escenas deben compartir la misma atmósfera cinematográfica, paleta de colores (dark slate, cyan neon, warm amber accents) y calidad 8k.
-5. Presentador Robot ante Laptop (Avatar Oficial):
-   - Sujeto inmutable: 'A sleek, friendly, futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a modern minimalist tech workstation in front of an open glowing holographic laptop'.
-   - El robot narrador debe aparecer en la escena 1 (gancho), en escenas de anclaje intermedias y en la escena final.
-   - Variedad de encuadres: varía intencionalmente entre 'medium shot of the robot looking to camera', 'close-up shot of the robot expressive eyes', 'over-the-shoulder shot looking at the glowing laptop screen'.
-6. Escenas conceptuales fluidas: Las escenas intermedias ilustran la analogía o concepto técnico (ej. diagramas de red 3D, flujos de partículas luminosas, arquitectura de software isométrica), compartiendo la misma iluminación suave y atmósfera que el entorno del robot para una transición visual imperceptible.
+1. El campo 'narracion': Distribuye íntegramente el texto aprobado a lo largo de las escenas en orden secuencial. No omitas texto ni inventes frases que alteren el guion. La última escena debe conservar exactamente el cierre institucional: 'En Okeconsulting estamos para acompañarte.'
+2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática, fotorrealista o digital 3D limpia. NUNCA pidas texto visible en la imagen (agrega siempre 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
+3. Duración y Dinamismo Visual: Divide el contenido en aproximadamente {num_escenas} escenas de ritmo muy ágil (promedio ~{duracion_promedio} segundos cada una), sumando un total estricto de entre 60 y 70 segundos netos para garantizar un ritmo dinámico y de alta retención.
+4. ESTILO VISUAL OBLIGATORIO: TONOS CLAROS (BRIGHT LIGHT TONES):
+   - Todas las imágenes DEBEN mantener una paleta luminosa en TONOS CLAROS: fondos blancos o beige suave, madera clara, luz natural de día, estética corporativa moderna, minimalista y optimista ('bright light tones, clean modern aesthetic, soft natural daylight, warm light wood, white walls, soft shadows, 8k render, no dark gloomy scenes, no text, no letters').
+   - Prohibido utilizar fondos oscuros, neones nocturnos, atmósferas lúgubres o cyberpunk oscuro.
+5. ESCENA 1 (INTRO) Y ESCENA FINAL (CIERRE) - AVATAR OFICIAL OKECONSULTING:
+   - La primera escena (gancho) y la última escena (despedida institucional) corresponden a la imagen oficial del Avatar de Okeconsulting (un personaje elegante con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, sentado ante una laptop en un escritorio de madera clara, en una oficina moderna y luminosa).
+   - En el prompt de la escena 1 describe la introducción con este personaje en su oficina luminosa mirando hacia el espectador.
+   - En el prompt de la última escena describe el cierre cálido con este mismo personaje en su oficina luminosa transmitiendo confianza y acompañamiento.
+6. ESCENAS INTERMEDIAS (2 a N-1) - CONCEPTOS Y ANALOGÍAS PARA PYMES:
+   - Ilustran de forma didáctica para dueños de Pymes los conceptos del guion (ej. flujos de trabajo organizados, dashboards limpios de métricas, conexiones automáticas entre tienda y pasarela de pago, inventarios sincronizados, personas de negocios en oficinas limpias y luminosas).
+   - Siempre compartiendo la misma atmósfera luminosa en tonos claros para una coherencia visual impecable.
 
-Estilo visual complementario: {estilo_visual or 'Cinematográfico, hiperrealista, iluminación suave de estudio tech, 8k render'}
+Estilo visual complementario: {estilo_visual or 'Tonos claros, iluminación natural de oficina moderna, maderas claras, estética limpia y luminosa, 8k render, no text'}
 """
 
     def _llamar_director():

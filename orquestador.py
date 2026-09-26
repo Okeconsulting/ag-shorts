@@ -18,34 +18,34 @@ from ensamble_ren import renderizar_video_final
 
 # Payload de respaldo para pruebas rápidas sin API Key
 PAYLOAD_EJEMPLO = {
-    "titulo_video": "Que es una API",
-    "tema": "Funcionamiento de una API en la vida cotidiana",
-    "discurso_completo": "Imagina que estás en un restaurante. Tú eres el cliente y la cocina es el servidor. El mesero que lleva tu orden y regresa con tu comida, es exactamente lo que hace una API. Conecta aplicaciones entre sí de forma segura y al instante. En Okeconsulting estamos para acompañarte.",
-    "conteo_palabras": 48,
-    "idea_analogia": "Un mesero que lleva pedidos entre el cliente y la cocina",
+    "titulo_video": "Que es una API para tu Pyme",
+    "tema": "Cómo una API ahorra tiempo y dinero a una Pyme",
+    "discurso_completo": "Si tienes una Pyme o negocio, seguro gestionas pedidos, cobros y mensajes todos los días. ¿Cómo conectar tus ventas con tu sistema de pagos sin perder tiempo en tareas manuales? A través de una API. Es como un puente digital seguro que comunica tus aplicaciones al instante, evitando errores humanos y acelerando tus procesos. En Okeconsulting estamos para acompañarte.",
+    "conteo_palabras": 64,
+    "idea_analogia": "Un puente digital seguro que conecta la tienda con la pasarela de pagos",
     "escenas": [
         {
             "id_escena": 1,
-            "narracion": "¿Sabías cómo se comunican las aplicaciones que usas todos los días?",
-            "prompt_imagen": "A modern minimalist tech workstation, a sleek friendly futuristic humanoid robot with expressive glowing cyan LED visor eyes, polished white ceramic and matte titanium chassis, seated at a desk in front of an open glowing holographic laptop, looking thoughtfully towards the camera, cinematic lighting, photorealistic 8k, no text, 9:16 vertical format",
+            "narracion": "Si tienes una Pyme o negocio, seguro gestionas pedidos, cobros y mensajes todos los días.",
+            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, seated at a light wood executive desk with laptop in a bright modern office with warm daylight, light tones, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 4
         },
         {
             "id_escena": 2,
-            "narracion": "Imagina que estás en un restaurante. Tú eres el cliente y la cocina es el servidor.",
-            "prompt_imagen": "A customer looking at a futuristic glowing holographic menu inside a stylish cyberpunk restaurant, 9:16 vertical orientation, no text",
+            "narracion": "¿Cómo conectar tus ventas con tu sistema de pagos sin perder tiempo en tareas manuales?",
+            "prompt_imagen": "A bright modern small business storefront with clean light wood counter, a sleek digital tablet displaying organized orders, soft natural daylight, bright light tones, clean aesthetic, no text, 9:16 vertical orientation",
             "duracion_estimada_segundos": 4
         },
         {
             "id_escena": 3,
-            "narracion": "El mesero que lleva tu orden y regresa con tu comida, es exactamente lo que hace una API.",
-            "prompt_imagen": "A sleek humanoid robot waiter delivering glowing digital data packets on a tray, neon reflections, 9:16 vertical orientation, no text",
+            "narracion": "A través de una API: un puente digital seguro que comunica tus aplicaciones al instante.",
+            "prompt_imagen": "A luminous minimalist 3D isometric diagram showing secure data flow between business apps, soft daylight, white and cream background, bright light tones, warm amber accents, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 5
         },
         {
             "id_escena": 4,
-            "narracion": "Conecta sistemas de forma invisible y segura. En Okeconsulting estamos para acompañarte.",
-            "prompt_imagen": "The same sleek friendly futuristic humanoid robot with glowing cyan LED visor eyes smiling confidently in front of its holographic laptop, warm ambient lighting, 9:16 vertical format, no text",
+            "narracion": "Evita errores humanos y acelera tus ventas. En Okeconsulting estamos para acompañarte.",
+            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, looking warmly towards camera at light wood desk in bright office, light tones, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 4
         }
     ]
