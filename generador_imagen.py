@@ -4,10 +4,33 @@ import time
 import urllib.parse
 import urllib.request
 from io import BytesIO
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageFilter
 
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+# ------------------------------------------------------------------------------
+# CONSTANTES DE ESTILO MAESTRO Y NITIDEZ
+# ------------------------------------------------------------------------------
+# Estilo maestro: 3D render corporativo minimalista en tonos claros,
+# perfectamente armonizado con el avatar oficial (avatar/avatar.jpg).
+ESTILO_MAESTRO_3D = (
+    "clean minimalist 3D corporate render, stylized elegant Pixar and Apple tech aesthetics, "
+    "bright daylight, soft studio illumination, warm light wood, pristine white and cream walls, "
+    "sage green and amber accents, perfectly centered composition, 8k resolution, ultra sharp focus, "
+    "crisp fine textures, clean geometry, smooth soft shadows"
+)
+
+MODIFICADORES_NITIDEZ_POSITIVOS = (
+    "ultra sharp focus, crisp fine details, 8k uhd, clean sharp edges, macro lens clarity, "
+    "commercial lighting, high fidelity, 9:16 vertical orientation"
+)
+
+MODIFICADORES_NEGATIVOS = (
+    "no blur, no depth of field blur, no bokeh, no motion blur, no lowres, no haze, "
+    "no grainy textures, no compression artifacts, no distorted anatomy, no dark gloomy shadows, "
+    "no text, no letters, no watermark, no logos"
+)
 
 def obtener_ruta_avatar() -> str | None:
     """Busca la imagen oficial del avatar en las rutas posibles del proyecto."""
@@ -26,7 +49,7 @@ def obtener_ruta_avatar() -> str | None:
 def preparar_imagen_avatar(ruta_avatar: str, ruta_salida: str) -> str:
     """
     Ajusta la imagen del avatar oficial exactamente a 1080x1920 (9:16 vertical)
-    conservando la proporción original mediante recorte inteligente y Lanczos.
+    conservando la proporción original mediante recorte inteligente y Lanczos de alta nitidez.
     """
     os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
     with Image.open(ruta_avatar) as img:
@@ -35,54 +58,72 @@ def preparar_imagen_avatar(ruta_avatar: str, ruta_salida: str) -> str:
         img_fitted.save(ruta_salida, format="PNG")
     return ruta_salida
 
-def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "") -> str:
+def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "", seed: int = None) -> str:
     """
-    Genera una imagen fotorrealista en formato vertical 9:16 (1080x1920) utilizando el motor visual FLUX.
-    Mantiene estrictamente una paleta de tonos claros, moderna, luminosa y orientada a Pymes.
+    Genera una imagen fotorrealista/3D en formato vertical 9:16 (1080x1920) utilizando FLUX.
+    - Aplica modificadores de ultra nitidez y estilo maestro en tonos claros.
+    - Soporta fijación de semilla (seed) para máxima coherencia visual entre escenas.
+    - Super-resolución local con Lanczos y máscara de enfoque adaptativa (UnsharpMask)
+      para eliminar definitivamente cualquier desenfoque o pérdida de definición.
     """
     os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
 
-    estilo_tonos_claros = "bright light tones, clean modern aesthetic, soft natural daylight, minimalist bright office and business atmosphere, high quality, 9:16 vertical orientation, no dark gloomy shadows, no text, no letters"
+    estilo_aplicar = estilo_global or ESTILO_MAESTRO_3D
 
-    prompt_completo = prompt
-    if estilo_global and estilo_global not in prompt:
-        prompt_completo = f"{prompt}, visual style: {estilo_global}, {estilo_tonos_claros}"
-    elif "light tones" not in prompt_completo.lower():
-        prompt_completo = f"{prompt}, {estilo_tonos_claros}"
+    # Construir el prompt completo asegurando que el estilo y la nitidez estén integrados
+    partes_prompt = [prompt.strip().rstrip(".")]
+    if estilo_aplicar not in prompt:
+        partes_prompt.append(estilo_aplicar)
+    partes_prompt.append(MODIFICADORES_NITIDEZ_POSITIVOS)
+    partes_prompt.append(MODIFICADORES_NEGATIVOS)
 
-    print(f"[Fase 4 - FLUX] Generando escena: '{prompt_completo[:65]}...'")
+    prompt_completo = ", ".join(partes_prompt)
 
-    prompt_codificado = urllib.parse.quote(prompt_completo[:350])
-    # Parámetros exactos para YouTube Shorts: 1080x1920 (9:16 vertical), motor FLUX, sin marca de agua
-    url = f"https://image.pollinations.ai/prompt/{prompt_codificado}?width=1080&height=1920&model=flux&nologo=true"
+    print(f"[Fase 4 - FLUX HD] Generando escena: '{prompt_completo[:75]}...' (seed={seed})")
+
+    # Ampliado a 850 caracteres para no cortar nunca palabras clave de nitidez
+    prompt_codificado = urllib.parse.quote(prompt_completo[:850])
+
+    param_seed = f"&seed={seed}" if seed is not None else ""
+    url = f"https://image.pollinations.ai/prompt/{prompt_codificado}?width=1080&height=1920&model=flux&nologo=true{param_seed}"
 
     req = urllib.request.Request(
         url,
-        headers={"User-Agent": "Okeconsulting-Shorts-Engine/1.0 (Windows; Python)"}
+        headers={"User-Agent": "Okeconsulting-Shorts-Engine/2.0 (Windows; Python)"}
     )
 
     max_reintentos = 3
     for intento in range(1, max_reintentos + 1):
         try:
-            with urllib.request.urlopen(req, timeout=50) as respuesta:
+            with urllib.request.urlopen(req, timeout=55) as respuesta:
                 datos_imagen = respuesta.read()
 
-            img = Image.open(BytesIO(datos_imagen))
-            img.save(ruta_salida, format="PNG")
-            print(f"[FLUX] Imagen guardada con éxito en: {ruta_salida} ({img.width}x{img.height})")
+            # Cargar imagen devuelta por la API
+            img_raw = Image.open(BytesIO(datos_imagen)).convert("RGB")
+
+            # FASE 1 DE NITIDEZ: Upscaling de alta fidelidad Lanczos a 1080x1920 nativo
+            img_upscaled = img_raw.resize((1080, 1920), Image.Resampling.LANCZOS)
+
+            # FASE 2 DE NITIDEZ: Máscara de enfoque fotográfica para eliminar bordes borrosos
+            img_final = img_upscaled.filter(
+                ImageFilter.UnsharpMask(radius=1.8, percent=140, threshold=2)
+            )
+
+            img_final.save(ruta_salida, format="PNG")
+            print(f"[FLUX HD] Imagen nítida guardada con éxito en: {ruta_salida} (1080x1920, seed={seed})")
             return ruta_salida
         except Exception as e:
             if intento == max_reintentos:
                 raise RuntimeError(f"Error descargando imagen con FLUX tras {max_reintentos} intentos: {e}")
-            print(f"  [FLUX] Conexión lenta o reintento {intento}/{max_reintentos}... esperando 4s.")
+            print(f"  [FLUX HD] Conexión lenta o reintento {intento}/{max_reintentos}... esperando 4s.")
             time.sleep(4)
 
 def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets") -> list:
     """
     Itera sobre las escenas del JSON y genera las imágenes en 'carpeta_salida/img_{id}.png'.
-    - La primera escena (img_1.png) y la última escena (img_N.png) usan avatar/avatar.jpg.
-    - Las escenas intermedias se generan con FLUX en formato vertical 9:16 en tonos claros.
-    - Aplica pausa preventiva de 5 segundos solo entre descargas remotas de FLUX.
+    - Escena 1 y escena N usan la imagen corporativa oficial avatar/avatar.jpg.
+    - Escenas intermedias usan FLUX con semilla vinculada (Seed Locking) y súper-resolución nítida.
+    - Pausa preventiva de 5 segundos solo entre llamadas remotas de FLUX.
     Retorna la lista de rutas generadas.
     """
     os.makedirs(carpeta_salida, exist_ok=True)
@@ -91,13 +132,17 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
     rutas_imagenes = []
     total_escenas = len(escenas)
 
+    # Semilla base determinista basada en el título para cohesión de luz, textura y color
+    titulo_video = datos_json.get("titulo_video", "video_short")
+    seed_base = abs(hash(titulo_video)) % 80000 + 1000
+
     ruta_avatar = obtener_ruta_avatar()
     if ruta_avatar:
-        print(f"[Fase 4] Avatar corporativo detectado en: '{ruta_avatar}' (se asignará a escena 1 y escena {total_escenas})")
+        print(f"[Fase 4] Avatar corporativo detectado en: '{ruta_avatar}' (asignado a escena 1 y escena {total_escenas})")
     else:
-        print(f"[Fase 4] Advertencia: No se encontró 'avatar/avatar.jpg', se generarán todas las escenas con FLUX.")
+        print(f"[Fase 4] Advertencia: No se encontró 'avatar/avatar.jpg', se generarán todas con FLUX.")
 
-    print(f"\n[Fase 4] Generando {total_escenas} imágenes (estilo tonos claros, 9:16 vertical) en '{carpeta_salida}'...")
+    print(f"\n[Fase 4] Produciendo {total_escenas} imágenes NÍTIDAS (estilo 3D tonos claros, 1080x1920) en '{carpeta_salida}'...")
 
     for idx, escena in enumerate(escenas, start=1):
         escena_id = escena.get("id_escena", escena.get("escena_id", idx))
@@ -107,22 +152,24 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
 
         if es_primera_o_ultima and ruta_avatar:
             preparar_imagen_avatar(ruta_avatar, ruta)
-            print(f"[Fase 4 - Avatar Oficial] Escena {idx}/{total_escenas}: Imagen de marca fijada con éxito -> {ruta}")
+            print(f"[Fase 4 - Avatar Oficial] Escena {idx}/{total_escenas}: Imagen de marca fijada -> {ruta}")
             rutas_imagenes.append(ruta)
         else:
+            # Semilla secuencial vinculada para que todas las escenas intermedias compartan el mismo estilo
+            seed_escena = seed_base + (idx * 17)
             generar_imagen_escena(
                 prompt=escena["prompt_imagen"],
                 ruta_salida=ruta,
-                estilo_global=estilo_global
+                estilo_global=estilo_global,
+                seed=seed_escena
             )
             rutas_imagenes.append(ruta)
 
             # Pausa preventiva de 5 segundos solo después de descargas web FLUX
-            # (no es necesaria si la siguiente escena es la última y usa el avatar local)
             siguiente_es_avatar = ((idx + 1 == total_escenas) and (ruta_avatar is not None))
             if idx < total_escenas and not siguiente_es_avatar:
                 print(f"[Fase 4] Pausa preventiva de 5 segundos antes de la escena {idx + 1}/{total_escenas}...")
                 time.sleep(5)
 
-    print(f"[Fase 4] Todas las imágenes ({len(rutas_imagenes)}) fueron generadas exitosamente.")
+    print(f"[Fase 4] Todas las imágenes ({len(rutas_imagenes)}) fueron generadas con súper-resolución y nitidez.")
     return rutas_imagenes

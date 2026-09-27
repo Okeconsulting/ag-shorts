@@ -79,18 +79,18 @@ Reglas Técnicas de Producción:
 1. El campo 'narracion': Distribuye íntegramente el texto aprobado a lo largo de las escenas en orden secuencial. No omitas texto ni inventes frases que alteren el guion. La última escena debe conservar exactamente el cierre institucional: 'En Okeconsulting estamos para acompañarte.'
 2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática, fotorrealista o digital 3D limpia. NUNCA pidas texto visible en la imagen (agrega siempre 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
 3. Duración y Dinamismo Visual: Divide el contenido en aproximadamente {num_escenas} escenas de ritmo muy ágil (promedio ~{duracion_promedio} segundos cada una), sumando un total estricto de entre 60 y 70 segundos netos para garantizar un ritmo dinámico y de alta retención.
-4. ESTILO VISUAL OBLIGATORIO: TONOS CLAROS (BRIGHT LIGHT TONES):
-   - Todas las imágenes DEBEN mantener una paleta luminosa en TONOS CLAROS: fondos blancos o beige suave, madera clara, luz natural de día, estética corporativa moderna, minimalista y optimista ('bright light tones, clean modern aesthetic, soft natural daylight, warm light wood, white walls, soft shadows, 8k render, no dark gloomy scenes, no text, no letters').
-   - Prohibido utilizar fondos oscuros, neones nocturnos, atmósferas lúgubres o cyberpunk oscuro.
+4. ESTILO VISUAL OBLIGATORIO: 3D MINIMALISTA TECNOLÓGICO EN TONOS CLAROS:
+   - Todas las imágenes DEBEN mantener una paleta luminosa en TONOS CLAROS: fondos blancos o beige suave, madera clara, luz natural diurna, estética 3D corporativa estilizada y limpia (estilo Apple / Pixar / Figma 3D): 'clean minimalist 3D corporate render, bright light tones, soft natural daylight, warm light wood, pristine white walls, smooth lighting, ultra sharp focus, crisp details, 8k render, 9:16 vertical format, no blur, no text, no letters'.
+   - Prohibido utilizar fondos oscuros, neones nocturnos, atmósferas lúgubres, cyberpunk oscuro o efectos de desenfoque excesivos (no bokeh, no blur).
 5. ESCENA 1 (INTRO) Y ESCENA FINAL (CIERRE) - AVATAR OFICIAL OKECONSULTING:
-   - La primera escena (gancho) y la última escena (despedida institucional) corresponden a la imagen oficial del Avatar de Okeconsulting (un personaje elegante con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, sentado ante una laptop en un escritorio de madera clara, en una oficina moderna y luminosa).
+   - La primera escena (gancho) y la última escena (despedida institucional) corresponden a la imagen oficial del Avatar de Okeconsulting (un personaje corporativo elegante con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, sentado ante una laptop en un escritorio de madera clara, en una oficina moderna y luminosa con el logo de Okeconsulting).
    - En el prompt de la escena 1 describe la introducción con este personaje en su oficina luminosa mirando hacia el espectador.
    - En el prompt de la última escena describe el cierre cálido con este mismo personaje en su oficina luminosa transmitiendo confianza y acompañamiento.
-6. ESCENAS INTERMEDIAS (2 a N-1) - CONCEPTOS Y ANALOGÍAS PARA PYMES:
+6. ESCENAS INTERMEDIAS (2 a N-1) - CONCEPTOS Y ANALOGÍAS PARA PYMES CON ENFOQUE NÍTIDO:
    - Ilustran de forma didáctica para dueños de Pymes los conceptos del guion (ej. flujos de trabajo organizados, dashboards limpios de métricas, conexiones automáticas entre tienda y pasarela de pago, inventarios sincronizados, personas de negocios en oficinas limpias y luminosas).
-   - Siempre compartiendo la misma atmósfera luminosa en tonos claros para una coherencia visual impecable.
+   - Composición centrada, limpia y con foco ultra nítido ('ultra sharp focus, crisp fine details, clean edges, centered composition'), compartiendo exactamente la misma atmósfera luminosa en tonos claros para una coherencia visual impecable.
 
-Estilo visual complementario: {estilo_visual or 'Tonos claros, iluminación natural de oficina moderna, maderas claras, estética limpia y luminosa, 8k render, no text'}
+Estilo visual complementario: {estilo_visual or 'Clean minimalist 3D corporate render, bright light tones, soft natural daylight, warm light wood, pristine white walls, ultra sharp focus, 8k render, no text, no blur'}
 """
 
     def _llamar_director():
