@@ -12,13 +12,12 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 # ------------------------------------------------------------------------------
 # CONSTANTES DE ESTILO MAESTRO Y NITIDEZ
 # ------------------------------------------------------------------------------
-# Estilo maestro: 3D render corporativo minimalista en tonos claros,
-# perfectamente armonizado con el avatar oficial (avatar/avatar.jpg).
+# Estilo maestro de renderizado y luz (sin forzar muebles específicos de oficina
+# para permitir que el sujeto concreto de cada escena brille según el guion).
 ESTILO_MAESTRO_3D = (
-    "clean minimalist 3D corporate render, stylized elegant Pixar and Apple tech aesthetics, "
-    "bright daylight, soft studio illumination, warm light wood, pristine white and cream walls, "
-    "sage green and amber accents, perfectly centered composition, 8k resolution, ultra sharp focus, "
-    "crisp fine textures, clean geometry, smooth soft shadows"
+    "clean minimalist 3D stylized render, elegant Pixar and Apple tech aesthetics, "
+    "bright soft daylight, luminous light tones, crisp geometry, smooth textures, "
+    "vibrant clean colors, professional commercial composition"
 )
 
 MODIFICADORES_NITIDEZ_POSITIVOS = (
@@ -61,6 +60,7 @@ def preparar_imagen_avatar(ruta_avatar: str, ruta_salida: str) -> str:
 def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "", seed: int = None) -> str:
     """
     Genera una imagen fotorrealista/3D en formato vertical 9:16 (1080x1920) utilizando FLUX.
+    - Respeta rigurosamente el sujeto y acción concreta al inicio del prompt.
     - Aplica modificadores de ultra nitidez y estilo maestro en tonos claros.
     - Soporta fijación de semilla (seed) para máxima coherencia visual entre escenas.
     - Super-resolución local con Lanczos y máscara de enfoque adaptativa (UnsharpMask)
@@ -70,18 +70,26 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
 
     estilo_aplicar = estilo_global or ESTILO_MAESTRO_3D
 
-    # Construir el prompt completo asegurando que el estilo y la nitidez estén integrados
+    # El prompt generado por el Director Técnico YA contiene el sujeto concreto al inicio.
     partes_prompt = [prompt.strip().rstrip(".")]
-    if estilo_aplicar not in prompt:
+
+    # Solo complementar el estilo si el prompt no contiene ya descriptores de estilo 3D
+    if "3d" not in prompt.lower() and "render" not in prompt.lower():
         partes_prompt.append(estilo_aplicar)
-    partes_prompt.append(MODIFICADORES_NITIDEZ_POSITIVOS)
-    partes_prompt.append(MODIFICADORES_NEGATIVOS)
+    elif estilo_global and estilo_global not in prompt:
+        partes_prompt.append(estilo_global)
+
+    # Agregar modificadores de nitidez óptica y negativos si no están ya en el prompt
+    if "ultra sharp" not in prompt.lower() and "sharp focus" not in prompt.lower():
+        partes_prompt.append(MODIFICADORES_NITIDEZ_POSITIVOS)
+    if "no blur" not in prompt.lower():
+        partes_prompt.append(MODIFICADORES_NEGATIVOS)
 
     prompt_completo = ", ".join(partes_prompt)
 
     print(f"[Fase 4 - FLUX HD] Generando escena: '{prompt_completo[:75]}...' (seed={seed})")
 
-    # Ampliado a 850 caracteres para no cortar nunca palabras clave de nitidez
+    # Ampliado a 850 caracteres para no cortar palabras clave de la narración ni de nitidez
     prompt_codificado = urllib.parse.quote(prompt_completo[:850])
 
     param_seed = f"&seed={seed}" if seed is not None else ""

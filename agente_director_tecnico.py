@@ -23,7 +23,7 @@ class EscenaTecnica(BaseModel):
         description="Fragmento de la narración en español para locución en esta escena."
     )
     prompt_imagen: str = Field(
-        description="Prompt en INGLÉS detallado para escena visual estática, iluminación cinematográfica, 9:16 vertical format, sin texto visible."
+        description="Prompt en INGLÉS detallado. CRÍTICO: el sujeto y acción concreta de la narración DEBEN ir al inicio (primeras 10 palabras)."
     )
     duracion_estimada_segundos: float = Field(
         description="Duración estimada de la escena en segundos (ej. 2 a 4 segundos)."
@@ -57,9 +57,10 @@ def generar_matriz_director_tecnico(
     Agente Director Técnico (Paso 3):
     Toma el guion aprobado y genera la matriz de producción en formato JSON estricto:
     - Escenas dinámicas (ritmo ágil, 60-70 seg totales).
+    - Storyboarding LITERAL: cada escena ilustra de forma directa y tangible lo que dice la narración.
+    - Sujeto y acción obligatorios en las primeras 10 palabras del prompt en inglés.
     - Escena 1 y Escena Final usan la imagen oficial del Avatar de Marca (avatar/avatar.jpg).
-    - Escenas intermedias en estética limpia, profesional y luminosa en TONOS CLAROS orientadas a Pymes.
-    - Prompts en inglés para formato vertical 9:16 sin texto visible.
+    - Escenas intermedias en estética 3D corporativa estilizada y limpia en TONOS CLAROS.
     - Guarda el resultado en 'JSON_Pront/<titulo_video>.json'.
     """
     client = obtener_cliente_gemini()
@@ -68,29 +69,47 @@ def generar_matriz_director_tecnico(
     duracion_promedio = max(1.0, round(65.0 / max(1, num_escenas), 1))
 
     instrucciones_sistema = f"""
-Eres un orquestador de video técnico automatizado para Okeconsulting. Tu única función es recibir el guion aprobado y devolver una matriz de producción en formato JSON estricto.
+Eres un orquestador y director de arte de video técnico para Okeconsulting. Tu misión es transformar el guion aprobado en una matriz de producción JSON donde cada escena visual represente DE FORMA LITERAL, CLARA Y CONCRETA lo que se está narrando.
 
 GUION APROBADO:
 Título: {titulo_video}
 Texto Completo:
 {narracion_aprobada}
 
-Reglas Técnicas de Producción:
-1. El campo 'narracion': Distribuye íntegramente el texto aprobado a lo largo de las escenas en orden secuencial. No omitas texto ni inventes frases que alteren el guion. La última escena debe conservar exactamente el cierre institucional: 'En Okeconsulting estamos para acompañarte.'
-2. El campo 'prompt_imagen': DEBE estar en INGLÉS. Describe una escena visual estática, fotorrealista o digital 3D limpia. NUNCA pidas texto visible en la imagen (agrega siempre 'no text, no letters'). Obliga a que sea vertical ('9:16 vertical format').
-3. Duración y Dinamismo Visual: Divide el contenido en aproximadamente {num_escenas} escenas de ritmo muy ágil (promedio ~{duracion_promedio} segundos cada una), sumando un total estricto de entre 60 y 70 segundos netos para garantizar un ritmo dinámico y de alta retención.
-4. ESTILO VISUAL OBLIGATORIO: 3D MINIMALISTA TECNOLÓGICO EN TONOS CLAROS:
-   - Todas las imágenes DEBEN mantener una paleta luminosa en TONOS CLAROS: fondos blancos o beige suave, madera clara, luz natural diurna, estética 3D corporativa estilizada y limpia (estilo Apple / Pixar / Figma 3D): 'clean minimalist 3D corporate render, bright light tones, soft natural daylight, warm light wood, pristine white walls, smooth lighting, ultra sharp focus, crisp details, 8k render, 9:16 vertical format, no blur, no text, no letters'.
-   - Prohibido utilizar fondos oscuros, neones nocturnos, atmósferas lúgubres, cyberpunk oscuro o efectos de desenfoque excesivos (no bokeh, no blur).
-5. ESCENA 1 (INTRO) Y ESCENA FINAL (CIERRE) - AVATAR OFICIAL OKECONSULTING:
-   - La primera escena (gancho) y la última escena (despedida institucional) corresponden a la imagen oficial del Avatar de Okeconsulting (un personaje corporativo elegante con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, sentado ante una laptop en un escritorio de madera clara, en una oficina moderna y luminosa con el logo de Okeconsulting).
-   - En el prompt de la escena 1 describe la introducción con este personaje en su oficina luminosa mirando hacia el espectador.
-   - En el prompt de la última escena describe el cierre cálido con este mismo personaje en su oficina luminosa transmitiendo confianza y acompañamiento.
-6. ESCENAS INTERMEDIAS (2 a N-1) - CONCEPTOS Y ANALOGÍAS PARA PYMES CON ENFOQUE NÍTIDO:
-   - Ilustran de forma didáctica para dueños de Pymes los conceptos del guion (ej. flujos de trabajo organizados, dashboards limpios de métricas, conexiones automáticas entre tienda y pasarela de pago, inventarios sincronizados, personas de negocios en oficinas limpias y luminosas).
-   - Composición centrada, limpia y con foco ultra nítido ('ultra sharp focus, crisp fine details, clean edges, centered composition'), compartiendo exactamente la misma atmósfera luminosa en tonos claros para una coherencia visual impecable.
+REGLAS ESTRICTAS DE STORYBOARDING Y DIRECCIÓN TÉCNICA:
 
-Estilo visual complementario: {estilo_visual or 'Clean minimalist 3D corporate render, bright light tones, soft natural daylight, warm light wood, pristine white walls, ultra sharp focus, 8k render, no text, no blur'}
+1. CORRESPONDENCIA VISUAL LITERAL CON LA NARRACIÓN (CRÍTICO):
+   - La imagen DEBE mostrar exactamente la acción, sujeto o analogía que se menciona en el campo 'narracion' de ESA escena específica.
+   - PROHIBIDO USAR METÁFORAS ABSTRACTAS O REPETITIVAS: Está estrictamente prohibido poner "engranajes 3D", "relojes de arena mágicos", "escudos flotantes", "paredes vacías" o "gráficos abstractos" a menos que el guion hable explícitamente de eso.
+   - Cada escena debe representar la acción real:
+     * Si la narración habla de mensajes acumulados o clientes esperando fuera de horario -> Muestra un smartphone o pantalla en primer plano con burbujas de chats acumuladas y un comerciante revisando los mensajes.
+     * Si habla de una tienda física abierta 24/7 -> Muestra la fachada o mostrador acogedor de una tienda o local comercial moderno con luz cálida y puertas abiertas recibiendo clientes.
+     * Si habla de respuestas automáticas con IA -> Muestra una conversación de chat amigable en pantalla resolviendo una consulta de pedido al instante.
+     * Si habla de pedidos recurrentes o envíos -> Muestra paquetes de compras organizados para despacho en un negocio limpio.
+     * Si habla de ahorro de tiempo o tranquilidad del dueño -> Muestra al dueño o dueña de la Pyme sonriendo relajado al ver su negocio funcionando ordenadamente.
+
+2. ESTRUCTURA OBLIGATORIA DE 'prompt_imagen' (SUJETO Y ACCIÓN AL INICIO):
+   - DEBE estar en INGLÉS.
+   - EL SUJETO Y LA ACCIÓN CONCRETA DEBEN IR EN LAS PRIMERAS 10 PALABRAS (los generadores de imagen priorizan el inicio del prompt).
+   - NUNCA inicies el prompt con palabras de estilo como "Clean minimalist 3D...". Inicia SIEMPRE con el sujeto y la acción: "A smartphone screen held in hand showing...", "A bright modern boutique storefront...", "Neatly arranged delivery boxes...".
+   - Formato obligatorio del prompt:
+     "[Sujeto específico y acción concreta que ilustra la narración], [entorno de negocio o tienda en tonos claros y luz de día], clean minimalist 3D stylized render, elegant Pixar and Apple aesthetics, bright soft daylight, luminous light tones, ultra sharp focus, crisp fine details, 8k, 9:16 vertical format, no text, no letters, no blur"
+
+3. ESCENA 1 (INTRO) Y ESCENA FINAL (CIERRE) - AVATAR DE MARCA:
+   - La Escena 1 y la última escena corresponden a la imagen oficial del Avatar de Okeconsulting (personaje corporativo con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, ante laptop en escritorio de madera clara, en oficina moderna y luminosa con logo de Okeconsulting).
+   - En Escena 1: Describe al avatar introduciendo el tema mirando a cámara en su oficina luminosa.
+   - En la Escena Final: Describe al avatar sonriendo cordialmente y cerrando con el acompañamiento de Okeconsulting.
+
+4. ESCENAS INTERMEDIAS (2 a N-1) - VARIEDAD VISUAL COHERENTE:
+   - Cada escena intermedia debe tener un sujeto visual DIFERENTE y CONCRETO que haga avanzar la historia de forma dinámica.
+   - Todas comparten la misma estética (3D minimalista estilizado, tonos claros, luz diurna, ultra sharp focus) pero con SUJETOS VARIADOS Y DIRECTAMENTE RELACIONADOS AL GUION.
+
+5. DURACIÓN Y DISTRIBUCIÓN:
+   - Divide el contenido en aproximadamente {num_escenas} escenas ágiles (promedio ~{duracion_promedio} segundos cada una), sumando entre 60 y 70 segundos totales.
+   - Distribuye la narración en orden secuencial sin omitir texto.
+   - La última escena debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'
+
+Estilo visual complementario: {estilo_visual or 'Clean minimalist 3D stylized render, bright light tones, soft natural daylight, ultra sharp focus, 8k render, no text, no blur'}
 """
 
     def _llamar_director():
