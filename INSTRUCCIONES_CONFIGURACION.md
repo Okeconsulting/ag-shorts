@@ -63,11 +63,26 @@ Copy-Item .env.trabajo .env -Force
 - **`gemini-2.5-flash`** (Recomendado): Muy rápido, excelente razonamiento y soporte nativo para esquemas JSON estructurados.
 - **`gemini-1.5-pro`**: Ideal para guiones con narrativa compleja o investigación profunda.
 
-### Modelos de Generación Visual (Imágenes)
-- **`imagen-3.0-generate-002`**: Modelo de Google Imagen 3 de alta fidelidad, con soporte para formato vertical `9:16`.
+### Modelos de Generación Visual (Imágenes 1080x1920 HD)
+Para generar las escenas sin costo y evitar el bloqueo por IP (`HTTP 402: Payment Required`), dispones de 2 opciones 100% gratuitas (sin tarjeta de crédito):
 
-> [!NOTE]
-> Las cuentas gratuitas de Google AI Studio tienen límites de peticiones por minuto (RPM) y por día (RPD). Las cuentas con facturación vinculada (Tier 1 / Pay-as-you-go) permiten mayores volúmenes y acceso pleno a Imagen 3.
+#### Opción 1: API Key Gratuita de Pollinations (Recomendada)
+1. Ingresa a [enter.pollinations.ai](https://enter.pollinations.ai).
+2. Inicia sesión con tu cuenta de GitHub o Google.
+3. Copia tu clave API (formato `sk_...`).
+4. Pégala en tu archivo `.env`:
+   ```bash
+   POLLINATIONS_API_KEY=sk_tu_clave_aqui
+   ```
+
+#### Opción 2: Token Gratuito de Hugging Face Serverless
+1. Ingresa a [Hugging Face Settings Tokens](https://huggingface.co/settings/tokens).
+2. Crea un User Access Token gratuito con permisos de lectura (`Read`).
+3. Pégalo en tu archivo `.env`:
+   ```bash
+   HF_TOKEN=hf_tu_token_aqui
+   ```
+El motor utilizará automáticamente `black-forest-labs/FLUX.1-schnell` a través de Hugging Face Serverless de forma gratuita.
 
 ---
 

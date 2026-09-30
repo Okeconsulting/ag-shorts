@@ -1,10 +1,15 @@
+import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
 from PIL import Image, ImageOps, ImageFilter
+from dotenv import load_dotenv
+
+load_dotenv()
 
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -57,9 +62,43 @@ def preparar_imagen_avatar(ruta_avatar: str, ruta_salida: str) -> str:
         img_fitted.save(ruta_salida, format="PNG")
     return ruta_salida
 
+def _generar_con_pollinations(prompt: str, api_key: str = "", seed: int = None) -> bytes:
+    """Descarga la imagen desde Pollinations AI usando FLUX."""
+    prompt_codificado = urllib.parse.quote(prompt[:850])
+    param_seed = f"&seed={seed}" if seed is not None else ""
+    param_key = f"&key={api_key}" if api_key else ""
+    url = f"https://image.pollinations.ai/prompt/{prompt_codificado}?width=1080&height=1920&model=flux&nologo=true{param_seed}{param_key}"
+
+    headers = {
+        "User-Agent": "Okeconsulting-Shorts-Engine/2.0 (Windows; Python)"
+    }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=55) as respuesta:
+        return respuesta.read()
+
+def _generar_con_huggingface(prompt: str, hf_token: str, seed: int = None) -> bytes:
+    """Descarga la imagen desde Hugging Face Serverless (FLUX.1-schnell gratuito)."""
+    url = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
+    payload = json.dumps({
+        "inputs": prompt[:850],
+        "parameters": {"width": 576, "height": 1024}
+    }).encode("utf-8")
+    headers = {
+        "Authorization": f"Bearer {hf_token}",
+        "Content-Type": "application/json",
+        "User-Agent": "Okeconsulting-Shorts-Engine/2.0 (Windows; Python)"
+    }
+    req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+    with urllib.request.urlopen(req, timeout=60) as respuesta:
+        return respuesta.read()
+
 def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "", seed: int = None) -> str:
     """
     Genera una imagen fotorrealista/3D en formato vertical 9:16 (1080x1920) utilizando FLUX.
+    - Soporta Pollinations (con API Key gratuita opcional) y Hugging Face Serverless (HF_TOKEN gratuito).
     - Respeta rigurosamente el sujeto y acción concreta al inicio del prompt.
     - Aplica modificadores de ultra nitidez y estilo maestro en tonos claros.
     - Soporta fijación de semilla (seed) para máxima coherencia visual entre escenas.
@@ -87,44 +126,89 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
 
     prompt_completo = ", ".join(partes_prompt)
 
-    print(f"[Fase 4 - FLUX HD] Generando escena: '{prompt_completo[:75]}...' (seed={seed})")
+    api_key_pollinations = os.getenv("POLLINATIONS_API_KEY", "").strip()
+    hf_token = os.getenv("HF_TOKEN", "").strip()
 
-    # Ampliado a 850 caracteres para no cortar palabras clave de la narración ni de nitidez
-    prompt_codificado = urllib.parse.quote(prompt_completo[:850])
+    motor_activo = "Hugging Face (FLUX.1-schnell)" if (hf_token and not api_key_pollinations) else "Pollinations (FLUX HD)"
+    print(f"[Fase 4 - {motor_activo}] Generando escena: '{prompt_completo[:75]}...' (seed={seed})")
 
-    param_seed = f"&seed={seed}" if seed is not None else ""
-    url = f"https://image.pollinations.ai/prompt/{prompt_codificado}?width=1080&height=1920&model=flux&nologo=true{param_seed}"
+    datos_imagen = None
+    max_reintentos = 3
 
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Okeconsulting-Shorts-Engine/2.0 (Windows; Python)"}
+    # 1. Intentar con Hugging Face si está configurado
+    if hf_token and not api_key_pollinations:
+        for intento in range(1, max_reintentos + 1):
+            try:
+                datos_imagen = _generar_con_huggingface(prompt_completo, hf_token, seed=seed)
+                break
+            except Exception as e:
+                if intento == max_reintentos:
+                    print(f"  [Hugging Face] Error tras {max_reintentos} intentos: {e}. Probando Pollinations...")
+                else:
+                    time.sleep(3)
+
+    # 2. Intentar con Pollinations si aún no hay imagen
+    if not datos_imagen:
+        for intento in range(1, max_reintentos + 1):
+            try:
+                datos_imagen = _generar_con_pollinations(prompt_completo, api_key=api_key_pollinations, seed=seed)
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 402 or e.code == 401:
+                    # Si falla con 402/401 y tenemos HF_TOKEN disponible, saltar a HF
+                    if hf_token:
+                        print(f"  [Aviso 402] Pollinations requirió créditos. Cambiando automáticamente a Hugging Face Serverless...")
+                        try:
+                            datos_imagen = _generar_con_huggingface(prompt_completo, hf_token, seed=seed)
+                            break
+                        except Exception as hf_err:
+                            print(f"  [Hugging Face] Error de respaldo: {hf_err}")
+
+                    mensaje_ayuda = (
+                        "\n" + "="*70 + "\n"
+                        "❌ [ERROR 402: PAGO / LÍMITE DE CUOTA ALCANZADO EN POLLINATIONS]\n"
+                        "Pollinations ha limitado las solicitudes anónimas a 1 imagen/hora para tu dirección IP.\n\n"
+                        "💡 CÓMO SOLUCIONARLO 100% GRATIS (SIN PAGAR Y SIN TARJETA DE CRÉDITO):\n\n"
+                        "OPCIÓN 1 (Recomendada - 30 segundos):\n"
+                        "  1. Entra a: https://enter.pollinations.ai e inicia sesión con tu cuenta de GitHub o Google.\n"
+                        "  2. Copia tu API Key gratuita (formato 'sk_...').\n"
+                        "  3. Pégala en tu archivo .env:\n"
+                        "     POLLINATIONS_API_KEY=sk_tu_clave_aqui\n\n"
+                        "OPCIÓN 2 (Hugging Face Serverless - 100% permanente):\n"
+                        "  1. Crea un token gratuito en: https://huggingface.co/settings/tokens (tipo 'Read').\n"
+                        "  2. Pégalo en tu archivo .env:\n"
+                        "     HF_TOKEN=hf_tu_token_aqui\n"
+                        "="*70
+                    )
+                    raise RuntimeError(mensaje_ayuda) from e
+
+                if intento == max_reintentos:
+                    raise RuntimeError(f"Error descargando imagen con FLUX tras {max_reintentos} intentos: {e}")
+                print(f"  [FLUX HD] Conexión lenta o reintento {intento}/{max_reintentos}... esperando 4s.")
+                time.sleep(4)
+            except Exception as e:
+                if intento == max_reintentos:
+                    raise RuntimeError(f"Error descargando imagen con FLUX tras {max_reintentos} intentos: {e}")
+                print(f"  [FLUX HD] Conexión lenta o reintento {intento}/{max_reintentos}... esperando 4s.")
+                time.sleep(4)
+
+    if not datos_imagen:
+        raise RuntimeError("No se pudieron obtener datos binarios de la imagen.")
+
+    # Cargar imagen devuelta por la API
+    img_raw = Image.open(BytesIO(datos_imagen)).convert("RGB")
+
+    # FASE 1 DE NITIDEZ: Upscaling de alta fidelidad Lanczos a 1080x1920 nativo
+    img_upscaled = img_raw.resize((1080, 1920), Image.Resampling.LANCZOS)
+
+    # FASE 2 DE NITIDEZ: Máscara de enfoque fotográfica para eliminar bordes borrosos
+    img_final = img_upscaled.filter(
+        ImageFilter.UnsharpMask(radius=1.8, percent=140, threshold=2)
     )
 
-    max_reintentos = 3
-    for intento in range(1, max_reintentos + 1):
-        try:
-            with urllib.request.urlopen(req, timeout=55) as respuesta:
-                datos_imagen = respuesta.read()
-
-            # Cargar imagen devuelta por la API
-            img_raw = Image.open(BytesIO(datos_imagen)).convert("RGB")
-
-            # FASE 1 DE NITIDEZ: Upscaling de alta fidelidad Lanczos a 1080x1920 nativo
-            img_upscaled = img_raw.resize((1080, 1920), Image.Resampling.LANCZOS)
-
-            # FASE 2 DE NITIDEZ: Máscara de enfoque fotográfica para eliminar bordes borrosos
-            img_final = img_upscaled.filter(
-                ImageFilter.UnsharpMask(radius=1.8, percent=140, threshold=2)
-            )
-
-            img_final.save(ruta_salida, format="PNG")
-            print(f"[FLUX HD] Imagen nítida guardada con éxito en: {ruta_salida} (1080x1920, seed={seed})")
-            return ruta_salida
-        except Exception as e:
-            if intento == max_reintentos:
-                raise RuntimeError(f"Error descargando imagen con FLUX tras {max_reintentos} intentos: {e}")
-            print(f"  [FLUX HD] Conexión lenta o reintento {intento}/{max_reintentos}... esperando 4s.")
-            time.sleep(4)
+    img_final.save(ruta_salida, format="PNG")
+    print(f"[FLUX HD] Imagen nítida guardada con éxito en: {ruta_salida} (1080x1920, seed={seed})")
+    return ruta_salida
 
 def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets") -> list:
     """
