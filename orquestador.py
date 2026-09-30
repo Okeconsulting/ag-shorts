@@ -14,7 +14,7 @@ from agente_redactor import redactar_guion_tecnico, solicitar_aprobacion_humana
 from agente_director_tecnico import generar_matriz_director_tecnico
 from generador_imagen import generar_imagenes_desde_json
 from audio_local import generar_audios_desde_json
-from ensamble_ren import renderizar_video_final
+from ensamble_ren import renderizar_video_final, adaptar_video_para_instagram_feed
 
 # Payload de respaldo para pruebas rápidas sin API Key
 PAYLOAD_EJEMPLO = {
@@ -105,7 +105,8 @@ def ejecutar_flujo_completo(
     auto_aprobar: bool = False,
     usar_ejemplo: bool = False,
     solo_guion: bool = False,
-    solo_json: bool = False
+    solo_json: bool = False,
+    feed_instagram: bool = False
 ):
     """
     Ejecuta el proceso end-to-end de 6 pasos para producción de Shorts:
@@ -231,13 +232,20 @@ def ejecutar_flujo_completo(
         matriz_escenas=matriz_json.get("escenas", [])
     )
 
+    archivo_feed = None
+    if feed_instagram:
+        print("\n[Paso Adicional] Generando versión adaptada para Instagram Feed 4:5 (1080x1350)...")
+        archivo_feed = adaptar_video_para_instagram_feed(archivo_video_salida)
+
     print("\n" + "="*70)
     print(f"🎉 ¡PROCESO FINALIZADO EXITOSAMENTE!")
     print(f"  - Guion:  guiones/{slug}.md")
     print(f"  - Matriz: JSON_Pront/{slug}.json ({total_escenas} escenas)")
     print(f"  - Escenas: {carpeta_escenas}/")
     print(f"  - Audios:  {carpeta_audios}/ (velocidad: {velocidad})")
-    print(f"  - Video:   {archivo_video_salida}")
+    print(f"  - Video 9:16 (Reels/Shorts/TikTok): {archivo_video_salida}")
+    if archivo_feed:
+        print(f"  - Video 4:5  (Instagram Feed Post): {archivo_feed}")
     print("="*70 + "\n")
 
 def main():
@@ -263,8 +271,17 @@ def main():
                         help="Detener el proceso tras el Paso 2 (guardar guion)")
     parser.add_argument("--solo-json", action="store_true",
                         help="Detener el proceso tras el Paso 3 (guardar matriz JSON)")
+    parser.add_argument("--feed", "--feed-instagram", dest="feed_instagram", action="store_true",
+                        help="Genera adicionalmente una versión adaptada a 4:5 (1080x1350) para el feed tradicional de Instagram")
+    parser.add_argument("--adaptar", dest="video_adaptar", type=str, default=None,
+                        help="Adapta un archivo .mp4 vertical 9:16 ya existente al formato 4:5 de Instagram Feed")
 
     args = parser.parse_args()
+
+    # Si se pide adaptar un video existente:
+    if args.video_adaptar:
+        adaptar_video_para_instagram_feed(args.video_adaptar)
+        return
 
     ruta_guion = args.guion
     tema_seleccionado = args.tema
@@ -300,7 +317,8 @@ def main():
         auto_aprobar=args.auto,
         usar_ejemplo=args.ejemplo,
         solo_guion=args.solo_guion,
-        solo_json=args.solo_json
+        solo_json=args.solo_json,
+        feed_instagram=args.feed_instagram
     )
 
 if __name__ == "__main__":

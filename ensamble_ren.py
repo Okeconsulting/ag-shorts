@@ -9,9 +9,9 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 
 # Soporte dual para MoviePy v1.x y v2.x
 try:
-    from moviepy import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip
+    from moviepy import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip, VideoFileClip, ColorClip
 except ImportError:
-    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip
+    from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips, CompositeVideoClip, VideoFileClip, ColorClip
 
 def obtener_fuente_subtitulos(tamano: int = 42) -> ImageFont.ImageFont:
     """Intenta cargar fuentes sans-serif gruesas disponibles en Windows."""
@@ -184,3 +184,46 @@ def renderizar_video_final(
     )
     print(f"\n[Éxito Total] Video con subtítulos y dinamismo exportado en: {archivo_salida}")
     return archivo_salida
+
+def adaptar_video_para_instagram_feed(ruta_video_9_16: str, ruta_salida_4_5: str = None) -> str:
+    """
+    Adapta un video vertical 9:16 (1080x1920) al formato vertical 4:5 (1080x1350)
+    requerido para publicaciones estándar en el Feed de Instagram.
+    """
+    if not os.path.exists(ruta_video_9_16):
+        raise FileNotFoundError(f"No se encontró el video origen: '{ruta_video_9_16}'")
+
+    if not ruta_salida_4_5:
+        base, ext = os.path.splitext(ruta_video_9_16)
+        ruta_salida_4_5 = f"{base}_instagram_4_5{ext}"
+
+    print(f"\n[Instagram Feed 4:5] Adaptando '{ruta_video_9_16}' a formato 4:5 (1080x1350)...")
+    clip = VideoFileClip(ruta_video_9_16)
+
+    # Escalar manteniendo la proporción vertical
+    if hasattr(clip, "resized"):
+        clip_escalado = clip.resized(height=1350)
+    else:
+        clip_escalado = clip.resize(height=1350)
+
+    # Lienzo de fondo 1080x1350
+    fondo = ColorClip(size=(1080, 1350), color=(18, 18, 24), duration=clip.duration)
+
+    if hasattr(clip_escalado, "with_position"):
+        video_compuesto = CompositeVideoClip([fondo, clip_escalado.with_position("center")])
+    else:
+        video_compuesto = CompositeVideoClip([fondo, clip_escalado.set_pos("center")])
+
+    video_compuesto.write_videofile(
+        ruta_salida_4_5,
+        fps=int(clip.fps or 30),
+        codec="libx264",
+        audio_codec="aac",
+        threads=4
+    )
+    clip.close()
+    video_compuesto.close()
+
+    print(f"[Instagram Feed 4:5] Video adaptado exportado exitosamente en: '{ruta_salida_4_5}'")
+    return ruta_salida_4_5
+
