@@ -79,21 +79,11 @@ def _generar_con_pollinations(prompt: str, api_key: str = "", seed: int = None) 
     with urllib.request.urlopen(req, timeout=55) as respuesta:
         return respuesta.read()
 
-def _generar_con_huggingface(prompt: str, hf_token: str, seed: int = None) -> bytes:
-    """Descarga la imagen desde Hugging Face Serverless (FLUX.1-schnell gratuito)."""
-    url = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
-    payload = json.dumps({
-        "inputs": prompt[:850],
-        "parameters": {"width": 576, "height": 1024}
-    }).encode("utf-8")
-    headers = {
-        "Authorization": f"Bearer {hf_token}",
-        "Content-Type": "application/json",
-        "User-Agent": "Okeconsulting-Shorts-Engine/2.0 (Windows; Python)"
-    }
-    req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=60) as respuesta:
-        return respuesta.read()
+def _generar_con_huggingface(prompt: str, hf_token: str, seed: int = None):
+    """Descarga la imagen usando Hugging Face Serverless (FLUX.1-schnell gratuito)."""
+    from huggingface_hub import InferenceClient
+    client = InferenceClient(token=hf_token)
+    return client.text_to_image(prompt[:850], model="black-forest-labs/FLUX.1-schnell")
 
 def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = "", seed: int = None) -> str:
     """
@@ -195,11 +185,14 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
     if not datos_imagen:
         raise RuntimeError("No se pudieron obtener datos binarios de la imagen.")
 
-    # Cargar imagen devuelta por la API
-    img_raw = Image.open(BytesIO(datos_imagen)).convert("RGB")
+    # Cargar imagen devuelta (puede ser PIL.Image o bytes)
+    if isinstance(datos_imagen, Image.Image):
+        img_raw = datos_imagen.convert("RGB")
+    else:
+        img_raw = Image.open(BytesIO(datos_imagen)).convert("RGB")
 
     # FASE 1 DE NITIDEZ: Upscaling de alta fidelidad Lanczos a 1080x1920 nativo
-    img_upscaled = img_raw.resize((1080, 1920), Image.Resampling.LANCZOS)
+    img_upscaled = ImageOps.fit(img_raw, (1080, 1920), method=Image.Resampling.LANCZOS)
 
     # FASE 2 DE NITIDEZ: Máscara de enfoque fotográfica para eliminar bordes borrosos
     img_final = img_upscaled.filter(
