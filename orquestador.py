@@ -20,32 +20,38 @@ from ensamble_ren import renderizar_video_final, adaptar_video_para_instagram_fe
 PAYLOAD_EJEMPLO = {
     "titulo_video": "Que es una API para tu Pyme",
     "tema": "Cómo una API ahorra tiempo y dinero a una Pyme",
-    "discurso_completo": "Si tienes una Pyme o negocio, seguro gestionas pedidos, cobros y mensajes todos los días. ¿Cómo conectar tus ventas con tu sistema de pagos sin perder tiempo en tareas manuales? A través de una API. Es como un puente digital seguro que comunica tus aplicaciones al instante, evitando errores humanos y acelerando tus procesos. En Okeconsulting estamos para acompañarte.",
-    "conteo_palabras": 64,
+    "discurso_completo": "¿Qué es una API y cómo puede transformar tu negocio? Si tienes una Pyme, seguro gestionas pedidos, cobros y mensajes todos los días. ¿Cómo conectar tus ventas con tu sistema de pagos sin perder tiempo en tareas manuales? A través de una API: un puente digital seguro que comunica tus aplicaciones al instante, evitando errores humanos y acelerando tus procesos. En Okeconsulting estamos para acompañarte.",
+    "conteo_palabras": 68,
     "idea_analogia": "Un puente digital seguro que conecta la tienda con la pasarela de pagos",
     "escenas": [
         {
             "id_escena": 1,
-            "narracion": "Si tienes una Pyme o negocio, seguro gestionas pedidos, cobros y mensajes todos los días.",
-            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, seated at a light wood executive desk with laptop in a bright modern office with warm daylight, light tones, 9:16 vertical format, no text",
+            "narracion": "¿Qué es una API y cómo puede transformar tu negocio?",
+            "prompt_imagen": "Clean elegant presentation title card with soft warm cream background, minimalist corporate card, professional typography, bright daylight tones, 9:16 vertical format, no blur",
             "duracion_estimada_segundos": 4
         },
         {
             "id_escena": 2,
+            "narracion": "Si tienes una Pyme o negocio, seguro gestionas pedidos, cobros y mensajes todos los días.",
+            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, seated at a light wood executive desk with laptop in a bright modern office with warm daylight, looking warmly towards camera, light tones, 9:16 vertical format, no text",
+            "duracion_estimada_segundos": 4
+        },
+        {
+            "id_escena": 3,
             "narracion": "¿Cómo conectar tus ventas con tu sistema de pagos sin perder tiempo en tareas manuales?",
             "prompt_imagen": "A bright modern small business storefront with clean light wood counter, a sleek digital tablet displaying organized orders, soft natural daylight, bright light tones, clean aesthetic, no text, 9:16 vertical orientation",
             "duracion_estimada_segundos": 4
         },
         {
-            "id_escena": 3,
+            "id_escena": 4,
             "narracion": "A través de una API: un puente digital seguro que comunica tus aplicaciones al instante.",
             "prompt_imagen": "A luminous minimalist 3D isometric diagram showing secure data flow between business apps, soft daylight, white and cream background, bright light tones, warm amber accents, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 5
         },
         {
-            "id_escena": 4,
+            "id_escena": 5,
             "narracion": "Evita errores humanos y acelera tus ventas. En Okeconsulting estamos para acompañarte.",
-            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, looking warmly towards camera at light wood desk in bright office, light tones, 9:16 vertical format, no text",
+            "prompt_imagen": "Official Okeconsulting avatar character with brown suit, white circular head with glasses, smiling warmly towards camera at light wood desk in bright office, light tones, 9:16 vertical format, no text",
             "duracion_estimada_segundos": 4
         }
     ]
@@ -113,7 +119,7 @@ def ejecutar_flujo_completo(
     1. Entrada del tema o carga de guion existente.
     2. Agente de Redacción o Carga directa de Guion + Aprobación Humana -> guiones/<slug>.md
     3. Agente Director Técnico -> JSON_Pront/<slug>.json (con num_escenas configurables)
-    4. Generación visual: Avatar Oficial (intro/cierre) + FLUX en Tonos Claros -> Escenas/<slug>/img_X.png
+    4. Generación visual: Portada tipográfica (Escena 1) + Avatar Oficial (Escenas 2 y Cierre) + FLUX en Tonos Claros -> Escenas/<slug>/img_X.png
     5. Síntesis de voz Edge-TTS (es-CL-LorenzoNeural con velocidad configurable) -> Audios/<slug>/audio_X.mp3
     6. Ensamblaje y Renderizado MoviePy (Subtítulos dinámicos + Ken Burns) -> shorts/<slug>/<slug>.mp4
     """
@@ -198,7 +204,7 @@ def ejecutar_flujo_completo(
     total_escenas = len(matriz_json.get("escenas", []))
 
     # --------------------------------------------------------------------------
-    # PASO 4: Generación Visual (Avatar Oficial en Intro/Cierre + FLUX en Tonos Claros)
+    # PASO 4: Generación Visual (Portada Caligráfica + Avatar Oficial + FLUX en Tonos Claros)
     # --------------------------------------------------------------------------
     carpeta_escenas = os.path.join("Escenas", slug)
     print(f"\n[Paso 4] Generando {total_escenas} escenas visuales en '{carpeta_escenas}'...")

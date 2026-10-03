@@ -1,12 +1,13 @@
 import json
 import os
 import sys
+import textwrap
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from io import BytesIO
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps, ImageFilter, ImageDraw, ImageFont
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -60,6 +61,114 @@ def preparar_imagen_avatar(ruta_avatar: str, ruta_salida: str) -> str:
         img_rgb = img.convert("RGB")
         img_fitted = ImageOps.fit(img_rgb, (1080, 1920), method=Image.Resampling.LANCZOS)
         img_fitted.save(ruta_salida, format="PNG")
+    return ruta_salida
+
+def generar_portada_titulo(titulo: str, ruta_salida: str) -> str:
+    """
+    Genera la imagen de la Escena 1 (portada del short en 1080x1920 nativo):
+    - Título del guion en caligrafía legible y nítida.
+    - Estilo en tonos claros, elegante y comercial, armonizado con la identidad de Okeconsulting.
+    - Distribución equilibrada que deja el tercio inferior libre para el subtítulo dinámico.
+    """
+    os.makedirs(os.path.dirname(ruta_salida), exist_ok=True)
+    ancho, alto = 1080, 1920
+    img = Image.new("RGB", (ancho, alto), color="#FAF8F5")
+    draw = ImageDraw.Draw(img)
+
+    # Degradado vertical sutil de fondo
+    for y in range(alto):
+        factor = y / alto
+        r = int(250 - factor * 14)
+        g = int(248 - factor * 16)
+        b = int(245 - factor * 18)
+        draw.line([(0, y), (ancho, y)], fill=(r, g, b))
+
+    card_w, card_h = 960, 1220
+    card_x0 = (ancho - card_w) // 2
+    card_y0 = 300
+    card_x1 = card_x0 + card_w
+    card_y1 = card_y0 + card_h
+
+    # Sombra suave de la tarjeta
+    for offset in range(16, 0, -2):
+        draw.rounded_rectangle(
+            [card_x0 - offset, card_y0 - offset, card_x1 + offset, card_y1 + offset],
+            radius=44,
+            fill=(225, 220, 212)
+        )
+    draw.rounded_rectangle(
+        [card_x0, card_y0, card_x1, card_y1],
+        radius=38,
+        fill="#FFFFFF",
+        outline="#E8E2D8",
+        width=3
+    )
+
+    # 1. Badge superior institucional
+    font_badge = None
+    for fb in ["segoeuib.ttf", "arialbd.ttf", "calibrib.ttf"]:
+        try:
+            font_badge = ImageFont.truetype(fb, 32)
+            break
+        except Exception:
+            continue
+    if not font_badge:
+        font_badge = ImageFont.load_default()
+
+    b_txt = "OKECONSULTING • PYMES"
+    bb = draw.textbbox((0, 0), b_txt, font=font_badge)
+    bw, bh = bb[2] - bb[0], bb[3] - bb[1]
+    pw, ph = bw + 56, bh + 24
+    px0, py0 = (ancho - pw) // 2, card_y0 + 60
+    draw.rounded_rectangle([px0, py0, px0 + pw, py0 + ph], radius=22, fill="#F6ECE1")
+    draw.text(((ancho - bw) // 2, py0 + 12), b_txt, font=font_badge, fill="#8B4513")
+
+    # 2. Tipografía del Título en caligrafía legible
+    # Prioridad: Lucida Calligraphy (LCALLIG.TTF) -> Gabriola -> Georgia Bold -> Segoe UI Bold
+    font_t = None
+    for f_name, size in [("LCALLIG.TTF", 78), ("Gabriola.ttf", 125), ("georgiab.ttf", 75), ("segoeuib.ttf", 72)]:
+        try:
+            font_t = ImageFont.truetype(f_name, size)
+            break
+        except Exception:
+            continue
+    if not font_t:
+        font_t = ImageFont.load_default()
+
+    lineas = textwrap.wrap(titulo, width=20)
+    line_heights = [draw.textbbox((0, 0), l, font=font_t)[3] - draw.textbbox((0, 0), l, font=font_t)[1] for l in lineas]
+    interlineado = 22
+    bloque_h = sum(line_heights) + interlineado * (len(lineas) - 1)
+
+    y_texto = card_y0 + 180 + (480 - bloque_h) // 2
+    for idx, l in enumerate(lineas):
+        bb_l = draw.textbbox((0, 0), l, font=font_t)
+        lw = bb_l[2] - bb_l[0]
+        lx = (ancho - lw) // 2
+        draw.text((lx, y_texto), l, font=font_t, fill="#181822", stroke_width=1, stroke_fill="#181822")
+        y_texto += line_heights[idx] + interlineado
+
+    # 3. Línea divisoria ámbar / dorada
+    div_w = 160
+    div_y = y_texto + 35
+    draw.rounded_rectangle([(ancho - div_w) // 2, div_y, (ancho + div_w) // 2, div_y + 6], radius=3, fill="#D97706")
+
+    # 4. Detalle decorativo
+    font_sub = None
+    for fs in ["segoeui.ttf", "arial.ttf", "calibri.ttf"]:
+        try:
+            font_sub = ImageFont.truetype(fs, 28)
+            break
+        except Exception:
+            continue
+    if not font_sub:
+        font_sub = ImageFont.load_default()
+
+    sub_txt = "Aprende en 60 segundos"
+    bb_s = draw.textbbox((0, 0), sub_txt, font=font_sub)
+    draw.text(((ancho - (bb_s[2] - bb_s[0])) // 2, div_y + 25), sub_txt, font=font_sub, fill="#9CA3AF")
+
+    img.save(ruta_salida, format="PNG")
     return ruta_salida
 
 def _generar_con_pollinations(prompt: str, api_key: str = "", seed: int = None) -> bytes:
@@ -206,8 +315,9 @@ def generar_imagen_escena(prompt: str, ruta_salida: str, estilo_global: str = ""
 def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets") -> list:
     """
     Itera sobre las escenas del JSON y genera las imágenes en 'carpeta_salida/img_{id}.png'.
-    - Escena 1 y escena N usan la imagen corporativa oficial avatar/avatar.jpg.
-    - Escenas intermedias usan FLUX con semilla vinculada (Seed Locking) y súper-resolución nítida.
+    - Escena 1 usa la portada con el título del guion en caligrafía legible y diseño nítido.
+    - Escena 2 y escena N (última) usan la imagen corporativa oficial avatar/avatar.jpg.
+    - Escenas intermedias (3 a N-1) usan FLUX con semilla vinculada (Seed Locking) y súper-resolución nítida.
     - Pausa preventiva de 5 segundos solo entre llamadas remotas de FLUX.
     Retorna la lista de rutas generadas.
     """
@@ -223,9 +333,9 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
 
     ruta_avatar = obtener_ruta_avatar()
     if ruta_avatar:
-        print(f"[Fase 4] Avatar corporativo detectado en: '{ruta_avatar}' (asignado a escena 1 y escena {total_escenas})")
+        print(f"[Fase 4] Avatar corporativo detectado en: '{ruta_avatar}' (asignado a escena 2 y escena {total_escenas})")
     else:
-        print(f"[Fase 4] Advertencia: No se encontró 'avatar/avatar.jpg', se generarán todas con FLUX.")
+        print(f"[Fase 4] Advertencia: No se encontró 'avatar/avatar.jpg', se generarán con FLUX las escenas no-portada.")
 
     print(f"\n[Fase 4] Produciendo {total_escenas} imágenes NÍTIDAS (estilo 3D tonos claros, 1080x1920) en '{carpeta_salida}'...")
 
@@ -233,14 +343,18 @@ def generar_imagenes_desde_json(datos_json: dict, carpeta_salida: str = "assets"
         escena_id = escena.get("id_escena", escena.get("escena_id", idx))
         ruta = os.path.join(carpeta_salida, f"img_{escena_id}.png")
 
-        es_primera_o_ultima = (idx == 1 or idx == total_escenas)
-
-        if es_primera_o_ultima and ruta_avatar:
+        if idx == 1:
+            # Escena 1: Portada con título del guion en caligrafía legible
+            generar_portada_titulo(titulo_video, ruta)
+            print(f"[Fase 4 - Portada Título] Escena {idx}/{total_escenas}: Portada tipográfica legible -> {ruta}")
+            rutas_imagenes.append(ruta)
+        elif (idx == 2 or idx == total_escenas) and ruta_avatar:
+            # Escena 2 y Escena Final: Avatar corporativo oficial
             preparar_imagen_avatar(ruta_avatar, ruta)
             print(f"[Fase 4 - Avatar Oficial] Escena {idx}/{total_escenas}: Imagen de marca fijada -> {ruta}")
             rutas_imagenes.append(ruta)
         else:
-            # Semilla secuencial vinculada para que todas las escenas intermedias compartan el mismo estilo
+            # Escenas intermedias: Generación con FLUX y súper-resolución
             seed_escena = seed_base + (idx * 17)
             generar_imagen_escena(
                 prompt=escena["prompt_imagen"],

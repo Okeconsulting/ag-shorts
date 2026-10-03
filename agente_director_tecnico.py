@@ -59,8 +59,9 @@ def generar_matriz_director_tecnico(
     - Escenas dinámicas (ritmo ágil, 60-70 seg totales).
     - Storyboarding LITERAL: cada escena ilustra de forma directa y tangible lo que dice la narración.
     - Sujeto y acción obligatorios en las primeras 10 palabras del prompt en inglés.
-    - Escena 1 y Escena Final usan la imagen oficial del Avatar de Marca (avatar/avatar.jpg).
-    - Escenas intermedias en estética 3D corporativa estilizada y limpia en TONOS CLAROS.
+    - Escena 1: Portada con título del video en caligrafía legible y nítida.
+    - Escena 2 y Escena Final: Imagen oficial del Avatar de Marca (avatar/avatar.jpg).
+    - Escenas intermedias (3 a N-1): Estética 3D corporativa estilizada y limpia en TONOS CLAROS.
     - Guarda el resultado en 'JSON_Pront/<titulo_video>.json'.
     """
     client = obtener_cliente_gemini()
@@ -95,16 +96,22 @@ REGLAS ESTRICTAS DE STORYBOARDING Y DIRECCIÓN TÉCNICA:
    - Formato obligatorio del prompt:
      "[Sujeto específico y acción concreta que ilustra la narración], [entorno de negocio o tienda en tonos claros y luz de día], clean minimalist 3D stylized render, elegant Pixar and Apple aesthetics, bright soft daylight, luminous light tones, ultra sharp focus, crisp fine details, 8k, 9:16 vertical format, no text, no letters, no blur"
 
-3. ESCENA 1 (INTRO) Y ESCENA FINAL (CIERRE) - AVATAR DE MARCA:
-   - La Escena 1 y la última escena corresponden a la imagen oficial del Avatar de Okeconsulting (personaje corporativo con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, ante laptop en escritorio de madera clara, en oficina moderna y luminosa con logo de Okeconsulting).
-   - En Escena 1: Describe al avatar introduciendo el tema mirando a cámara en su oficina luminosa.
-   - En la Escena Final: Describe al avatar sonriendo cordialmente y cerrando con el acompañamiento de Okeconsulting.
+3. ESCENA 1 (PORTADA CON TÍTULO EN CALIGRAFÍA LEGIBLE):
+   - La Escena 1 es la portada del video Short / Reel con el título en caligrafía editorial clara y nítida.
+   - En 'narracion': Coloca la frase inicial de gancho o pregunta introductoria del guion.
+   - En 'prompt_imagen': Describe la portada de presentación limpia: "Clean elegant presentation title card with soft warm cream background, minimalist corporate card, professional typography, bright daylight tones, 9:16 vertical format, no blur".
 
-4. ESCENAS INTERMEDIAS (2 a N-1) - VARIEDAD VISUAL COHERENTE:
+4. ESCENA 2 (APERTURA) Y ESCENA FINAL (CIERRE) - AVATAR DE MARCA:
+   - La Escena 2 y la última escena corresponden a la imagen oficial del Avatar de Okeconsulting (personaje corporativo con traje café, corbata, cabeza circular blanca minimalista con gafas redondas, ante laptop en escritorio de madera clara, en oficina moderna y luminosa con logo de Okeconsulting).
+   - En Escena 2: Describe al avatar introduciendo cordialmente el tema mirando a cámara en su oficina luminosa ("Official Okeconsulting avatar character with brown suit, white circular head with glasses, seated at a light wood executive desk with laptop in a bright modern office with warm daylight, looking warmly towards camera, light tones, 9:16 vertical format, no text").
+   - En la Escena Final: Describe al avatar sonriendo cordialmente y cerrando con el acompañamiento de Okeconsulting ("Official Okeconsulting avatar character with brown suit, white circular head with glasses, smiling warmly towards camera at light wood desk in bright office, light tones, 9:16 vertical format, no text").
+
+5. ESCENAS INTERMEDIAS (3 a N-1) - STORYBOARDING LITERAL Y VARIEDAD VISUAL:
    - Cada escena intermedia debe tener un sujeto visual DIFERENTE y CONCRETO que haga avanzar la historia de forma dinámica.
+   - Muestra de forma tangible y literal lo que se narra en el guion.
    - Todas comparten la misma estética (3D minimalista estilizado, tonos claros, luz diurna, ultra sharp focus) pero con SUJETOS VARIADOS Y DIRECTAMENTE RELACIONADOS AL GUION.
 
-5. DURACIÓN Y DISTRIBUCIÓN:
+6. DURACIÓN Y DISTRIBUCIÓN:
    - Divide el contenido en aproximadamente {num_escenas} escenas ágiles (promedio ~{duracion_promedio} segundos cada una), sumando entre 60 y 70 segundos totales.
    - Distribuye la narración en orden secuencial sin omitir texto.
    - La última escena debe terminar exactamente con: 'En Okeconsulting estamos para acompañarte.'
